@@ -1,8 +1,9 @@
-const CACHE_NAME = 'dawomix-v9'; // Změň verzi, pokud aktualizuješ soubory
+const CACHE_NAME = 'dawomix-v10'; // Změň verzi, pokud aktualizuješ soubory
 const urlsToCache = [
     './',
     './index.html',
     './gdrive-advanced.js',
+    './dropbox-advanced.js',
     './logo.png',
     './source.png',
     './mega.png',
