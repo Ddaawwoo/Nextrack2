@@ -1,0 +1,8 @@
+{
+  "appId": "cz.technologicteam.nextrack2",
+  "appName": "Dawomix",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  }
+}
