@@ -995,43 +995,63 @@
             };
         }
 
-        async function addTrackFromFile(file, duration) {
+        function addTrackFromFile(file, duration) {
             const parsedName = parseTrackName(file.name);
-            let trackTitle = parsedName.title;
-            let trackArtist = parsedName.artist;
-
-            const saveFileTrack = async () => {
-                let analysis = { bpm: null, key: '--', energy: 'Analyzing', energyScore: null, danceability: null };
-                try {
-                    analysis = await analyzeAudioFile(file);
-                } catch (error) {
-                    console.error('Audio analysis failed:', error);
-                    analysis.energy = 'Medium';
-                }
-                saveTrackToDB({
-                    title: trackTitle,
-                    artist: trackArtist,
-                    duration: Number.isFinite(duration) && duration > 0 ? duration : 0,
-                    ...analysis,
-                    analyzedAt: Date.now(),
-                    fileBlob: file
-                });
+            const shouldAutoAnalyze = file.size <= 20 * 1024 * 1024;
+            const initialTrack = {
+                title: parsedName.title,
+                artist: parsedName.artist,
+                duration: Number.isFinite(duration) && duration > 0 ? duration : 0,
+                bpm: null,
+                key: '--',
+                energy: shouldAutoAnalyze ? 'Analyzing' : 'Pending',
+                energyScore: null,
+                danceability: null,
+                analysisPending: true,
+                fileBlob: file
             };
 
-            if (!window.jsmediatags) {
-                saveFileTrack();
-                return;
-            }
+            // Persist first. On slower Android phones ID3 parsing or decoding a large MP3
+            // can take a long time or exhaust memory; the selected track must not disappear.
+            saveTrackToDB(initialTrack, (trackId) => {
+                if (window.jsmediatags) {
+                    jsmediatags.read(file, {
+                        onSuccess: function(tag) {
+                            const metadata = {};
+                            if (tag.tags.title) metadata.title = tag.tags.title;
+                            if (tag.tags.artist) metadata.artist = tag.tags.artist;
+                            if (Object.keys(metadata).length) {
+                                updateTrackInDB(trackId, metadata).catch(error => {
+                                    console.error('Metadata update failed:', error);
+                                });
+                            }
+                        },
+                        onError: function(error) {
+                            console.error('Error reading ID3 tags:', error);
+                        }
+                    });
+                }
 
-            jsmediatags.read(file, {
-                onSuccess: function(tag) {
-                    if (tag.tags.title) trackTitle = tag.tags.title;
-                    if (tag.tags.artist) trackArtist = tag.tags.artist;
-                    saveFileTrack();
-                },
-                onError: function(error) {
-                    console.error("Error reading ID3 tags:", error);
-                    saveFileTrack();
+                // Let IndexedDB commit and the UI render before CPU-heavy analysis starts.
+                // Large files stay safely imported and can be analyzed manually with the
+                // waveform button, avoiding memory crashes on mobile devices.
+                if (shouldAutoAnalyze) {
+                    setTimeout(async () => {
+                        try {
+                            const analysis = await analyzeAudioFile(file);
+                            await updateTrackInDB(trackId, {
+                                ...analysis,
+                                analysisPending: false,
+                                analyzedAt: Date.now()
+                            });
+                        } catch (error) {
+                            console.error('Audio analysis failed:', error);
+                            await updateTrackInDB(trackId, {
+                                energy: 'Pending',
+                                analysisPending: true
+                            }).catch(() => {});
+                        }
+                    }, 250);
                 }
             });
         }
@@ -1245,10 +1265,38 @@
             toggleFormContainer();
         }
 
-        function saveTrackToDB(track) {
+        function saveTrackToDB(track, onSaved) {
             const transaction = db.transaction(["tracks"], "readwrite");
             const store = transaction.objectStore("tracks");
-            store.add(track).onsuccess = () => loadDataFromDB();
+            const request = store.add(track);
+            request.onsuccess = () => {
+                loadDataFromDB();
+                if (onSaved) onSaved(request.result);
+            };
+            request.onerror = () => console.error('Track save failed:', request.error);
+        }
+
+        function updateTrackInDB(trackId, updates) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction(["tracks"], "readwrite");
+                const store = transaction.objectStore("tracks");
+                const getRequest = store.get(trackId);
+                getRequest.onerror = () => reject(getRequest.error);
+                getRequest.onsuccess = () => {
+                    const track = getRequest.result;
+                    if (!track) {
+                        reject(new Error('Uložená skladba nebyla nalezena.'));
+                        return;
+                    }
+                    Object.assign(track, updates);
+                    const putRequest = store.put(track);
+                    putRequest.onerror = () => reject(putRequest.error);
+                    putRequest.onsuccess = () => {
+                        loadDataFromDB();
+                        resolve(track);
+                    };
+                };
+            });
         }
 
         function deleteTrack(id, event) {
