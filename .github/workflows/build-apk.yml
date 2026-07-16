@@ -1,0 +1,66 @@
+name: Sestavit APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - chatgpt-dev
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Stáhnout repozitář
+        uses: actions/checkout@v4
+
+      - name: Nastavit Javu 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - name: Nastavit Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Najít Android projekt
+        id: android-project
+        shell: bash
+        run: |
+          set -euo pipefail
+          GRADLEW_PATH="$(find . -type f -name gradlew -not -path '*/node_modules/*' | head -n 1)"
+          if [ -z "$GRADLEW_PATH" ]; then
+            echo "Nebyl nalezen soubor gradlew. Repozitář zatím neobsahuje kompletní Android projekt."
+            exit 1
+          fi
+          PROJECT_DIR="$(dirname "$GRADLEW_PATH")"
+          echo "dir=$PROJECT_DIR" >> "$GITHUB_OUTPUT"
+          chmod +x "$GRADLEW_PATH"
+          echo "Android projekt nalezen v: $PROJECT_DIR"
+
+      - name: Sestavit debug APK
+        working-directory: ${{ steps.android-project.outputs.dir }}
+        run: ./gradlew --no-daemon --stacktrace assembleDebug
+
+      - name: Vypsat vytvořená APK
+        shell: bash
+        run: |
+          find . -type f -name "*.apk" -print
+
+      - name: Uložit APK ke stažení
+        uses: actions/upload-artifact@v4
+        with:
+          name: Nextrack2-debug-apk
+          path: |
+            **/build/outputs/apk/**/*.apk
+          if-no-files-found: error
+          retention-days: 30
