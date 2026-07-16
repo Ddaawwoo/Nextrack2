@@ -728,7 +728,17 @@
 
         request.onsuccess = (e) => {
             db = e.target.result;
+            db.onversionchange = () => db.close();
             loadDataFromDB();
+        };
+
+        request.onerror = () => {
+            console.error('IndexedDB se nepodařilo otevřít:', request.error);
+            alert('Knihovnu se nepodařilo otevřít. Zkontroluj, zda prohlížeč nepoužívá anonymní režim a zda má web povolené úložiště.');
+        };
+
+        request.onblocked = () => {
+            alert('Aktualizace knihovny je blokovaná jinou otevřenou kartou aplikace. Zavři ostatní karty a obnov stránku.');
         };
 
         function loadDataFromDB() {
@@ -1000,40 +1010,73 @@
             let trackTitle = parsedName.title;
             let trackArtist = parsedName.artist;
 
-            const saveFileTrack = async () => {
-                let analysis = { bpm: null, key: '--', energy: 'Analyzing', energyScore: null, danceability: null };
-                try {
-                    analysis = await analyzeAudioFile(file);
-                } catch (error) {
-                    console.error('Audio analysis failed:', error);
-                    analysis.energy = 'Medium';
-                }
-                saveTrackToDB({
-                    title: trackTitle,
-                    artist: trackArtist,
-                    duration: Number.isFinite(duration) && duration > 0 ? duration : 0,
-                    ...analysis,
-                    analyzedAt: Date.now(),
-                    fileBlob: file
+            const readMetadata = () => new Promise(resolve => {
+                if (!window.jsmediatags) return resolve();
+                jsmediatags.read(file, {
+                    onSuccess: tag => {
+                        if (tag.tags.title) trackTitle = tag.tags.title;
+                        if (tag.tags.artist) trackArtist = tag.tags.artist;
+                        resolve();
+                    },
+                    onError: error => {
+                        console.warn('Metadata skladby nelze přečíst:', error);
+                        resolve();
+                    }
                 });
+            });
+
+            await readMetadata();
+
+            // Nejdřív uložit samotný soubor. Analýza proběhne až následně na pozadí,
+            // takže velké skladby nezablokují import do knihovny.
+            const track = {
+                title: trackTitle,
+                artist: trackArtist,
+                duration: Number.isFinite(duration) && duration > 0 ? duration : 0,
+                bpm: null,
+                key: '--',
+                energy: 'Analyzing',
+                energyScore: null,
+                danceability: null,
+                analyzedAt: null,
+                fileBlob: file,
+                originalFileName: file.name,
+                mimeType: file.type || getAudioMimeType(file.name),
+                fileSize: file.size || 0,
+                importedAt: Date.now()
             };
 
-            if (!window.jsmediatags) {
-                saveFileTrack();
+            let trackId;
+            try {
+                trackId = await saveTrackToDB(track);
+            } catch (error) {
+                console.error('Skladbu se nepodařilo uložit:', error);
+                const quotaError = error?.name === 'QuotaExceededError';
+                alert(quotaError
+                    ? `Skladbu „${file.name}“ nelze uložit, protože úložiště prohlížeče je plné.`
+                    : `Skladbu „${file.name}“ se nepodařilo uložit do knihovny.`);
                 return;
             }
 
-            jsmediatags.read(file, {
-                onSuccess: function(tag) {
-                    if (tag.tags.title) trackTitle = tag.tags.title;
-                    if (tag.tags.artist) trackArtist = tag.tags.artist;
-                    saveFileTrack();
-                },
-                onError: function(error) {
-                    console.error("Error reading ID3 tags:", error);
-                    saveFileTrack();
-                }
-            });
+            analyzingTrackIds.add(trackId);
+            updateAppUI();
+
+            analyzeAudioFile(file)
+                .then(analysis => updateTrackInDB(trackId, {
+                    ...analysis,
+                    analyzedAt: Date.now()
+                }))
+                .catch(error => {
+                    console.warn('Audio analýza byla přeskočena:', error);
+                    return updateTrackInDB(trackId, {
+                        energy: 'Medium',
+                        analyzedAt: Date.now()
+                    });
+                })
+                .finally(() => {
+                    analyzingTrackIds.delete(trackId);
+                    loadDataFromDB();
+                });
         }
 
         function fft(re, im) {
@@ -1189,23 +1232,37 @@
         }
 
         function processFiles(files) {
-            for (let i = 0; i < files.length; i++) {
-                const file = files[i];
-                if (!isSupportedAudioFile(file)) continue;
+            const selectedFiles = Array.from(files || []);
+            const supportedFiles = selectedFiles.filter(isSupportedAudioFile);
 
-                const objectURL = URL.createObjectURL(file);
-                const tempAudio = new Audio(objectURL);
-
-                tempAudio.onloadedmetadata = () => {
-                    addTrackFromFile(file, tempAudio.duration);
-                    URL.revokeObjectURL(objectURL);
-                };
-
-                tempAudio.onerror = () => {
-                    addTrackFromFile(file, 0);
-                    URL.revokeObjectURL(objectURL);
-                };
+            if (!selectedFiles.length) return;
+            if (!supportedFiles.length) {
+                alert('Nebyl vybrán žádný podporovaný hudební soubor. Použij MP3, M4A, AAC, WAV, OGG nebo FLAC.');
+                return;
             }
+
+            if (!db) {
+                alert('Knihovna se ještě načítá. Obnov stránku a zkus import znovu.');
+                return;
+            }
+
+            supportedFiles.forEach(file => {
+                const objectURL = URL.createObjectURL(file);
+                const tempAudio = new Audio();
+                tempAudio.preload = 'metadata';
+
+                const finish = duration => {
+                    URL.revokeObjectURL(objectURL);
+                    addTrackFromFile(file, duration);
+                };
+
+                tempAudio.onloadedmetadata = () => finish(tempAudio.duration);
+                tempAudio.onerror = () => finish(0);
+                tempAudio.src = objectURL;
+            });
+
+            const skipped = selectedFiles.length - supportedFiles.length;
+            alert(`Importuji ${supportedFiles.length} ${supportedFiles.length === 1 ? 'skladbu' : 'skladeb'}${skipped ? `. Přeskočeno nepodporovaných souborů: ${skipped}.` : '.'}`);
         }
 
         function addManualTrack() {
@@ -1246,9 +1303,36 @@
         }
 
         function saveTrackToDB(track) {
-            const transaction = db.transaction(["tracks"], "readwrite");
-            const store = transaction.objectStore("tracks");
-            store.add(track).onsuccess = () => loadDataFromDB();
+            return new Promise((resolve, reject) => {
+                if (!db) {
+                    reject(new Error('Databáze ještě není připravená.'));
+                    return;
+                }
+                const transaction = db.transaction(["tracks"], "readwrite");
+                const request = transaction.objectStore("tracks").add(track);
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+                transaction.oncomplete = () => loadDataFromDB();
+                transaction.onerror = () => reject(transaction.error);
+                transaction.onabort = () => reject(transaction.error || new Error('Uložení bylo přerušeno.'));
+            });
+        }
+
+        function updateTrackInDB(trackId, changes) {
+            return new Promise((resolve, reject) => {
+                if (!db) return reject(new Error('Databáze není připravená.'));
+                const transaction = db.transaction(["tracks"], "readwrite");
+                const store = transaction.objectStore("tracks");
+                const getRequest = store.get(trackId);
+                getRequest.onsuccess = () => {
+                    if (!getRequest.result) return reject(new Error('Skladba nebyla nalezena.'));
+                    store.put({ ...getRequest.result, ...changes, id: trackId });
+                };
+                getRequest.onerror = () => reject(getRequest.error);
+                transaction.oncomplete = () => resolve();
+                transaction.onerror = () => reject(transaction.error);
+                transaction.onabort = () => reject(transaction.error || new Error('Aktualizace byla přerušena.'));
+            });
         }
 
         function deleteTrack(id, event) {

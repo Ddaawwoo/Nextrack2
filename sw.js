@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dawomix-v8'; // Změň verzi, pokud aktualizuješ soubory
+const CACHE_NAME = 'dawomix-v9'; // Změň verzi, pokud aktualizuješ soubory
 const urlsToCache = [
     './',
     './index.html',
