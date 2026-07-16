@@ -22,45 +22,52 @@ jobs:
       - name: Stáhnout repozitář
         uses: actions/checkout@v4
 
-      - name: Nastavit Javu 17
+      - name: Nastavit Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: package.json
+
+      - name: Nainstalovat Capacitor
+        run: npm install
+
+      - name: Připravit webové soubory
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf www android
+          mkdir -p www/icons
+          cp index.html manifest.json sw.js gdrive-advanced.js www/
+          cp logo.png source.png mega.png googledrive.png dropbox.png settings.png www/
+          cp -R icons/. www/icons/
+
+      - name: Vytvořit Android projekt
+        run: npx cap add android
+
+      - name: Synchronizovat web do Androidu
+        run: npx cap sync android
+
+      - name: Nastavit Javu 21
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "17"
+          java-version: "21"
           cache: gradle
 
       - name: Nastavit Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Najít Android projekt
-        id: android-project
-        shell: bash
-        run: |
-          set -euo pipefail
-          GRADLEW_PATH="$(find . -type f -name gradlew -not -path '*/node_modules/*' | head -n 1)"
-          if [ -z "$GRADLEW_PATH" ]; then
-            echo "Nebyl nalezen soubor gradlew. Repozitář zatím neobsahuje kompletní Android projekt."
-            exit 1
-          fi
-          PROJECT_DIR="$(dirname "$GRADLEW_PATH")"
-          echo "dir=$PROJECT_DIR" >> "$GITHUB_OUTPUT"
-          chmod +x "$GRADLEW_PATH"
-          echo "Android projekt nalezen v: $PROJECT_DIR"
-
       - name: Sestavit debug APK
-        working-directory: ${{ steps.android-project.outputs.dir }}
-        run: ./gradlew --no-daemon --stacktrace assembleDebug
-
-      - name: Vypsat vytvořená APK
-        shell: bash
+        working-directory: android
         run: |
-          find . -type f -name "*.apk" -print
+          chmod +x gradlew
+          ./gradlew --no-daemon --stacktrace assembleDebug
 
       - name: Uložit APK ke stažení
         uses: actions/upload-artifact@v4
         with:
           name: Nextrack2-debug-apk
-          path: |
-            **/build/outputs/apk/**/*.apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 30
