@@ -239,30 +239,119 @@
                 min-height: 48px !important;
             }
             #libraryContainer {
-                padding: 10px !important;
+                padding: 6px !important;
                 min-height: 220px;
             }
             .track-row {
-                align-items: stretch !important;
-                flex-direction: column;
-                gap: 8px;
-                padding: 11px !important;
+                align-items: center !important;
+                flex-direction: row;
+                gap: 4px;
+                padding: 7px 8px !important;
+                border-radius: 12px !important;
             }
             .track-row > div:last-child {
                 justify-content: flex-end;
-                border-top: 1px solid var(--color-border);
-                padding-top: 7px;
+                border-top: 0;
+                padding-top: 0;
+                gap: 0 !important;
             }
             .track-row button {
-                min-width: 40px;
-                min-height: 40px;
+                min-width: 34px;
+                min-height: 36px;
             }
             .track-row > div:first-child > button {
-                min-width: 44px;
-                min-height: 44px;
+                min-width: 36px;
+                min-height: 36px;
                 display: inline-flex;
                 align-items: center;
                 justify-content: center;
+            }
+            .track-row > div:first-child > svg:first-child {
+                display: none;
+            }
+            .track-row > div:first-child {
+                gap: 3px !important;
+            }
+            .track-row h4 {
+                font-size: 10px !important;
+            }
+            .track-row p {
+                font-size: 8px !important;
+            }
+            #trackList {
+                gap: 5px;
+            }
+            .playlist-card {
+                padding: 10px !important;
+                gap: 10px !important;
+                border-radius: 14px !important;
+            }
+            .playlist-card > div:first-child {
+                width: 72px !important;
+                height: 72px !important;
+            }
+            #editTrackModal,
+            #settingsModal,
+            #cloudModal {
+                padding: 8px !important;
+            }
+            #editTrackModal > div {
+                padding: 12px !important;
+                gap: 10px !important;
+                max-height: 96dvh !important;
+                border-radius: 16px !important;
+            }
+            #editTrackModal h3 {
+                font-size: 15px !important;
+                padding-bottom: 8px !important;
+            }
+            #editTrackModal > div > div:nth-child(2) {
+                gap: 11px !important;
+                padding-right: 3px !important;
+            }
+            #editTrackModal input,
+            #editTrackModal textarea {
+                padding: 9px !important;
+            }
+            #editTrackModal textarea {
+                min-height: 66px;
+            }
+            #editTrackPlaylistImageFallback,
+            #editTrackPlaylistImage {
+                width: 48px !important;
+                height: 48px !important;
+            }
+            #editGenreChips {
+                gap: 5px !important;
+            }
+            #editGenreChips button {
+                min-height: 34px;
+                padding: 5px 10px !important;
+                font-size: 11px !important;
+            }
+            #editTrackModal > div > div:last-child {
+                padding-top: 8px !important;
+            }
+            #settingsModal > div {
+                padding: 12px !important;
+                gap: 10px !important;
+                max-width: 23rem !important;
+                border-radius: 16px !important;
+            }
+            #settingsModal .space-y-3 {
+                gap: 8px !important;
+            }
+            #settingsModal .pt-4 {
+                padding-top: 10px !important;
+            }
+            #themeSelector button,
+            #waveformColorSelector button {
+                padding: 5px !important;
+                min-height: 58px;
+            }
+            #themeSelector button > div,
+            #waveformColorSelector svg {
+                height: 24px !important;
             }
             .player-shell {
                 padding-left: 10px !important;
@@ -275,7 +364,7 @@
                 margin-left: -10px !important;
             }
             #waveformContainer {
-                height: 48px !important;
+                height: 40px !important;
             }
             #playBtn {
                 width: 48px !important;
@@ -1955,7 +2044,7 @@
 
             playlists.forEach(pl => {
                 const plBox = document.createElement('div');
-                plBox.className = "bg-[var(--color-bg-secondary)] border border-[var(--color-border)] p-4 rounded-2xl shadow-md flex space-x-4 items-start";
+                plBox.className = "playlist-card bg-[var(--color-bg-secondary)] border border-[var(--color-border)] p-4 rounded-2xl shadow-md flex space-x-4 items-start";
                 
                 let tracksHtml = "";
                 const plTracks = pl.trackIds.map(id => tracks.find(t => t.id === id)).filter(Boolean);
