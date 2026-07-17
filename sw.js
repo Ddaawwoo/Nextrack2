@@ -1,9 +1,12 @@
-const CACHE_NAME = 'dawomix-v10'; // Změň verzi, pokud aktualizuješ soubory
+const CACHE_NAME = 'dawomix-v11'; // Změň verzi, pokud aktualizuješ soubory
 const urlsToCache = [
     './',
     './index.html',
     './gdrive-advanced.js',
     './dropbox-advanced.js',
+    './manifest.json',
+    './icons/icon-192x192.png',
+    './icons/icon-512x512.png',
     './logo.png',
     './source.png',
     './mega.png',
@@ -26,6 +29,8 @@ self.addEventListener('install', event => {
 
 // Zachytávání požadavků: HTML vždy zkusí nejdřív síť, assety mohou zůstat cache-first.
 self.addEventListener('fetch', event => {
+    if (event.request.method !== 'GET') return;
+
     if (event.request.mode === 'navigate') {
         event.respondWith(
             fetch(event.request)
@@ -39,11 +44,19 @@ self.addEventListener('fetch', event => {
         return;
     }
 
+    const isStaticAsset = ['script', 'style', 'image', 'font'].includes(event.request.destination);
+    if (!isStaticAsset) return;
+
     event.respondWith(
-        caches.match(event.request)
-            .then(response => {
-                return response || fetch(event.request);
-            })
+        caches.match(event.request).then(cachedResponse => {
+            const networkResponse = fetch(event.request).then(response => {
+                if (response.ok || response.type === 'opaque') {
+                    caches.open(CACHE_NAME).then(cache => cache.put(event.request, response.clone()));
+                }
+                return response;
+            }).catch(() => cachedResponse);
+            return cachedResponse || networkResponse;
+        })
     );
 });
 
