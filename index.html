@@ -373,7 +373,16 @@
                 <div id="megaFileList" class="space-y-2 max-h-48 overflow-y-auto text-xs">
                     <!-- Vygenerované cloudové skladby -->
                 </div>
-                <button onclick="logoutMega()" class="w-full text-center text-[10px] text-[var(--color-accent-danger)] hover:opacity-80 uppercase pt-2 transition">Odhlásit se</button>
+                <div class="grid grid-cols-2 gap-2 pt-1 border-t border-[var(--color-border)]">
+                    <button onclick="closeCloudModal()" class="min-h-11 flex items-center justify-center gap-1.5 text-xs font-bold text-[var(--color-text-main)] bg-[var(--color-bg-main)] border border-[var(--color-border)] hover:border-[var(--color-accent-primary)] rounded-xl transition" title="Zpět do knihovny">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                        <span>Zpět</span>
+                    </button>
+                    <button onclick="logoutMega()" class="min-h-11 flex items-center justify-center gap-1.5 text-xs font-bold text-[var(--color-accent-danger)] bg-[var(--color-accent-danger)]/5 border border-[var(--color-accent-danger)]/30 hover:bg-[var(--color-accent-danger)]/10 rounded-xl transition" title="Odhlásit účet MEGA">
+                        <i data-lucide="log-out" class="w-4 h-4"></i>
+                        <span>Odhlásit se</span>
+                    </button>
+                </div>
             </div>
 
         </div>
