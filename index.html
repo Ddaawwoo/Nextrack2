@@ -23,52 +23,52 @@
     <script src="dropbox-advanced.js"></script>
     <style>
         :root {
-            --color-bg-main: #0d0e15;
-            --color-bg-secondary: #161824;
-            --color-border: #25283d;
-            --color-text-main: #e5e7eb;
-            --color-text-secondary: #6b7280;
-            --color-accent-primary: #22d3ee; /* cyan-400 */
+            --color-bg-main: #070a12;
+            --color-bg-secondary: #111827;
+            --color-border: #263349;
+            --color-text-main: #f1f5f9;
+            --color-text-secondary: #8290a7;
+            --color-accent-primary: #22d3ee;
             --color-accent-primary-rgb: 34, 211, 238;
-            --color-accent-secondary: #a855f7; /* purple-500 */
-            --color-accent-tertiary: #f59e0b; /* amber-500 */
-            --color-accent-danger: #ef4444; /* red-500 */
+            --color-accent-secondary: #d946ef;
+            --color-accent-tertiary: #fbbf24;
+            --color-accent-danger: #fb4f67;
         }
         [data-theme="forest"] {
-            --color-bg-main: #1a201c;
-            --color-bg-secondary: #242d27;
-            --color-border: #3a4a40;
-            --color-text-main: #d4d4d8;
-            --color-text-secondary: #a1a1aa;
-            --color-accent-primary: #4ade80; /* green-400 */
-            --color-accent-primary-rgb: 74, 222, 128;
-            --color-accent-secondary: #f97316; /* orange-500 */
-            --color-accent-tertiary: #22d3ee; /* cyan-400 */
-            --color-accent-danger: #f43f5e; /* rose-500 */
+            --color-bg-main: #07120d;
+            --color-bg-secondary: #102019;
+            --color-border: #254536;
+            --color-text-main: #ecfdf5;
+            --color-text-secondary: #86a99a;
+            --color-accent-primary: #34d399;
+            --color-accent-primary-rgb: 52, 211, 153;
+            --color-accent-secondary: #a3e635;
+            --color-accent-tertiary: #fbbf24;
+            --color-accent-danger: #fb7185;
         }
         [data-theme="ocean"] {
-            --color-bg-main: #0c1427;
-            --color-bg-secondary: #1a2339;
-            --color-border: #2d3a5c;
-            --color-text-main: #e0e0e0;
-            --color-text-secondary: #8f9bb3;
-            --color-accent-primary: #3b82f6; /* blue-500 */
-            --color-accent-primary-rgb: 59, 130, 246;
-            --color-accent-secondary: #14b8a6; /* teal-500 */
-            --color-accent-tertiary: #a78bfa; /* violet-400 */
-            --color-accent-danger: #f87171; /* red-300 */
+            --color-bg-main: #050d1c;
+            --color-bg-secondary: #0d1b32;
+            --color-border: #203d66;
+            --color-text-main: #eff6ff;
+            --color-text-secondary: #83a5cf;
+            --color-accent-primary: #38bdf8;
+            --color-accent-primary-rgb: 56, 189, 248;
+            --color-accent-secondary: #2dd4bf;
+            --color-accent-tertiary: #818cf8;
+            --color-accent-danger: #fb7185;
         }
         [data-theme="sunset"] {
-            --color-bg-main: #20002c;
-            --color-bg-secondary: #3a0a3f;
-            --color-border: #5a2a5f;
-            --color-text-main: #f5e1ff;
-            --color-text-secondary: #c8a2c8;
-            --color-accent-primary: #ff7e5f; /* Coral */
-            --color-accent-primary-rgb: 255, 126, 95;
-            --color-accent-secondary: #feb47b; /* Light Orange */
-            --color-accent-tertiary: #f472b6; /* pink-400 */
-            --color-accent-danger: #ff5e78; /* Bright Pink/Red */
+            --color-bg-main: #190714;
+            --color-bg-secondary: #2b1025;
+            --color-border: #5c274c;
+            --color-text-main: #fff1f7;
+            --color-text-secondary: #c28da9;
+            --color-accent-primary: #fb7185;
+            --color-accent-primary-rgb: 251, 113, 133;
+            --color-accent-secondary: #f97316;
+            --color-accent-tertiary: #facc15;
+            --color-accent-danger: #f43f5e;
         }
         [data-theme="matrix"] {
             --color-bg-main: #000000;
@@ -83,16 +83,28 @@
             --color-accent-danger: #00FF41;
         }
         [data-theme="arctic"] {
-            --color-bg-main: #0f172a; /* slate-900 */
-            --color-bg-secondary: #1e293b; /* slate-800 */
-            --color-border: #334155; /* slate-700 */
-            --color-text-main: #e2e8f0; /* slate-200 */
-            --color-text-secondary: #94a3b8; /* slate-400 */
-            --color-accent-primary: #7dd3fc; /* sky-300 */
+            --color-bg-main: #0b111b;
+            --color-bg-secondary: #172231;
+            --color-border: #385064;
+            --color-text-main: #f0f9ff;
+            --color-text-secondary: #9bb5c7;
+            --color-accent-primary: #7dd3fc;
             --color-accent-primary-rgb: 125, 211, 252;
-            --color-accent-secondary: #0ea5e9; /* sky-500 */
-            --color-accent-tertiary: #c084fc; /* purple-400 */
-            --color-accent-danger: #fb7185; /* rose-400 */
+            --color-accent-secondary: #e0f2fe;
+            --color-accent-tertiary: #a78bfa;
+            --color-accent-danger: #fb7185;
+        }
+        [data-theme="club"] {
+            --color-bg-main: #06030d;
+            --color-bg-secondary: #140a22;
+            --color-border: #42205f;
+            --color-text-main: #faf5ff;
+            --color-text-secondary: #a78bb9;
+            --color-accent-primary: #00e5ff;
+            --color-accent-primary-rgb: 0, 229, 255;
+            --color-accent-secondary: #ff2bd6;
+            --color-accent-tertiary: #b7ff2a;
+            --color-accent-danger: #ff3b6b;
         }
         body {
             touch-action: manipulation;
@@ -512,30 +524,34 @@
             
             <div class="space-y-3 text-xs">
                 <label class="text-[9px] text-[var(--color-text-secondary)] uppercase font-bold block">Barevné schéma</label>
-                <div id="themeSelector" class="grid grid-cols-3 gap-2 text-[var(--color-text-main)]">
+                <div id="themeSelector" class="grid grid-cols-2 gap-2 text-[var(--color-text-main)]">
                     <button onclick="setTheme('default')" class="p-2 border rounded-lg transition">
-                        <div class="w-full h-8 rounded" style="background: linear-gradient(45deg, #0d0e15, #22d3ee);"></div>
-                        <span class="text-[9px] mt-1.5 block">Cyber</span>
+                        <div class="w-full h-8 rounded" style="background: linear-gradient(135deg, #070a12 20%, #22d3ee 65%, #d946ef);"></div>
+                        <span class="text-[9px] mt-1.5 block">Cyber Neon</span>
                     </button>
                     <button onclick="setTheme('forest')" class="p-2 border border-transparent hover:border-[var(--color-border)] rounded-lg transition">
-                        <div class="w-full h-8 rounded" style="background: linear-gradient(45deg, #1a201c, #4ade80);"></div>
-                        <span class="text-[9px] mt-1.5 block">Forest</span>
+                        <div class="w-full h-8 rounded" style="background: linear-gradient(135deg, #07120d, #34d399 65%, #a3e635);"></div>
+                        <span class="text-[9px] mt-1.5 block">Forest Pulse</span>
                     </button>
                     <button onclick="setTheme('ocean')" class="p-2 border border-transparent hover:border-[var(--color-border)] rounded-lg transition">
-                        <div class="w-full h-8 rounded" style="background: linear-gradient(45deg, #0c1427, #3b82f6);"></div>
-                        <span class="text-[9px] mt-1.5 block">Ocean</span>
+                        <div class="w-full h-8 rounded" style="background: linear-gradient(135deg, #050d1c, #38bdf8 65%, #2dd4bf);"></div>
+                        <span class="text-[9px] mt-1.5 block">Ocean Blue</span>
                     </button>
                     <button onclick="setTheme('sunset')" class="p-2 border border-transparent hover:border-[var(--color-border)] rounded-lg transition">
-                        <div class="w-full h-8 rounded" style="background: linear-gradient(45deg, #20002c, #ff7e5f);"></div>
-                        <span class="text-[9px] mt-1.5 block">Sunset</span>
+                        <div class="w-full h-8 rounded" style="background: linear-gradient(135deg, #190714, #fb7185 60%, #f97316);"></div>
+                        <span class="text-[9px] mt-1.5 block">Sunset Club</span>
                     </button>
                     <button onclick="setTheme('matrix')" class="p-2 border border-transparent hover:border-[var(--color-border)] rounded-lg transition">
-                        <div class="w-full h-8 rounded" style="background: linear-gradient(45deg, #000000, #00FF41);"></div>
-                        <span class="text-[9px] mt-1.5 block">Matrix</span>
+                        <div class="w-full h-8 rounded" style="background: linear-gradient(135deg, #000, #00ff41 70%, #111);"></div>
+                        <span class="text-[9px] mt-1.5 block">Matrix Live</span>
                     </button>
                     <button onclick="setTheme('arctic')" class="p-2 border border-transparent hover:border-[var(--color-border)] rounded-lg transition">
-                        <div class="w-full h-8 rounded" style="background: linear-gradient(45deg, #0f172a, #7dd3fc);"></div>
-                        <span class="text-[9px] mt-1.5 block">Arctic</span>
+                        <div class="w-full h-8 rounded" style="background: linear-gradient(135deg, #0b111b, #7dd3fc 65%, #e0f2fe);"></div>
+                        <span class="text-[9px] mt-1.5 block">Arctic Ice</span>
+                    </button>
+                    <button onclick="setTheme('club')" class="col-span-2 p-2 border border-transparent hover:border-[var(--color-border)] rounded-lg transition">
+                        <div class="w-full h-8 rounded" style="background: linear-gradient(90deg, #06030d, #00e5ff 35%, #ff2bd6 70%, #b7ff2a);"></div>
+                        <span class="text-[9px] mt-1.5 block">Neon Club</span>
                     </button>
                 </div>
             </div>
