@@ -163,6 +163,23 @@
         #libraryContainer.library-drag-active {
             border-color: var(--color-accent-primary);
         }
+        #cloudModal.mega-explorer-open > div {
+            max-width: 30rem;
+            height: min(46rem, calc(100dvh - 2rem));
+            padding: 1rem;
+        }
+        #cloudModal.mega-explorer-open #megaFileExplorer {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            min-height: 0;
+        }
+        #cloudModal.mega-explorer-open #megaFileList {
+            flex: 1;
+            min-height: 0;
+            max-height: none;
+            overscroll-behavior: contain;
+        }
 
         /* Mobile-first ergonomics: larger tap targets, safe areas and less cramped cards. */
         button, input, select, textarea {
@@ -893,7 +910,11 @@
 
         function showMegaLogin() {
             document.getElementById('cloudServiceSelect').classList.add('hidden');
-            document.getElementById('megaLoginForm').classList.remove('hidden');
+            const isSignedIn = Boolean(megaStorage);
+            document.getElementById('megaLoginForm').classList.toggle('hidden', isSignedIn);
+            document.getElementById('megaFileExplorer').classList.toggle('hidden', !isSignedIn);
+            document.getElementById('cloudModal').classList.toggle('mega-explorer-open', isSignedIn);
+            if (isSignedIn) renderMegaFiles();
         }
 
         function backToCloudSelect() {
@@ -945,6 +966,7 @@
 
                 document.getElementById('megaLoginForm').classList.add('hidden');
                 document.getElementById('megaFileExplorer').classList.remove('hidden');
+                document.getElementById('cloudModal').classList.add('mega-explorer-open');
                 document.getElementById('megaLoginLoading').classList.add('hidden');
                 document.getElementById('megaLoginContent').classList.remove('hidden');
                 document.getElementById('megaEmail').value = "";
@@ -1057,6 +1079,7 @@
             document.getElementById('megaFileExplorer').classList.add('hidden');
             document.getElementById('megaLoginForm').classList.add('hidden');
             document.getElementById('cloudServiceSelect').classList.remove('hidden');
+            document.getElementById('cloudModal').classList.remove('mega-explorer-open');
 
             // Resetovat přihlašovací formulář
             document.getElementById('megaEmail').value = "";
