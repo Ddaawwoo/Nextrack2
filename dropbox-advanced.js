@@ -19,7 +19,10 @@ window.DropboxIntegration = (() => {
     let accessToken = sessionStorage.getItem(STORAGE.TOKEN);
 
     function redirectUri() {
-        return `${window.location.origin}${window.location.pathname}`;
+        // GitHub Pages can expose the same page as both / and /index.html.
+        // Dropbox requires an exact redirect URI match, so always use one canonical URL.
+        const pathname = window.location.pathname.replace(/index\.html$/i, '');
+        return `${window.location.origin}${pathname}`;
     }
 
     function randomUrlSafeString(length = 64) {

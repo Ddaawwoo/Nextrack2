@@ -163,6 +163,114 @@
         #libraryContainer.library-drag-active {
             border-color: var(--color-accent-primary);
         }
+
+        /* Mobile-first ergonomics: larger tap targets, safe areas and less cramped cards. */
+        button, input, select, textarea {
+            font: inherit;
+        }
+        button {
+            touch-action: manipulation;
+        }
+        input, select, textarea {
+            font-size: 16px !important;
+        }
+        header button {
+            min-width: 44px;
+            min-height: 44px;
+        }
+        .player-tabs button {
+            min-height: 52px;
+        }
+        footer {
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        @media (max-width: 420px) {
+            header {
+                padding: 8px 10px !important;
+            }
+            header > img {
+                max-width: 96px;
+                object-fit: contain;
+            }
+            header .space-x-2 {
+                gap: 2px;
+            }
+            header .space-x-2 > :not([hidden]) ~ :not([hidden]) {
+                margin-left: 0;
+            }
+            #installAppButton span,
+            header .w-px {
+                display: none;
+            }
+            main {
+                padding: 10px !important;
+                margin-bottom: 184px !important;
+            }
+            #statsPanel {
+                grid-template-columns: repeat(5, minmax(58px, 1fr));
+                overflow-x: auto;
+                scrollbar-width: none;
+                scroll-snap-type: x proximity;
+                padding-bottom: 2px;
+            }
+            #statsPanel::-webkit-scrollbar {
+                display: none;
+            }
+            #statsPanel > div {
+                scroll-snap-align: start;
+                min-height: 48px !important;
+            }
+            #libraryContainer {
+                padding: 10px !important;
+                min-height: 220px;
+            }
+            .track-row {
+                align-items: stretch !important;
+                flex-direction: column;
+                gap: 8px;
+                padding: 11px !important;
+            }
+            .track-row > div:last-child {
+                justify-content: flex-end;
+                border-top: 1px solid var(--color-border);
+                padding-top: 7px;
+            }
+            .track-row button {
+                min-width: 40px;
+                min-height: 40px;
+            }
+            .track-row > div:first-child > button {
+                min-width: 44px;
+                min-height: 44px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .player-shell {
+                padding-left: 10px !important;
+                padding-right: 10px !important;
+                padding-bottom: 10px !important;
+                gap: 8px !important;
+            }
+            .player-shell > div:first-child {
+                width: calc(100% + 20px) !important;
+                margin-left: -10px !important;
+            }
+            #waveformContainer {
+                height: 48px !important;
+            }
+            #playBtn {
+                width: 48px !important;
+                height: 48px !important;
+            }
+            #playBtn + button,
+            #playBtn ~ button,
+            #playBtn:nth-child(2) {
+                min-width: 44px;
+                min-height: 44px;
+            }
+        }
     </style>
 </head>
 <body class="bg-[var(--color-bg-main)] text-[var(--color-text-main)] min-h-screen flex flex-col justify-between select-none">

@@ -67,7 +67,7 @@ test('signIn opens Dropbox OAuth with PKCE for each user', async () => {
   assert.equal(auth.pathname, '/oauth2/authorize');
   assert.equal(auth.searchParams.get('client_id'), 'ro3534tr3nfa1fo');
   assert.equal(auth.searchParams.get('response_type'), 'code');
-  assert.equal(auth.searchParams.get('redirect_uri'), 'https://ddaawwoo.github.io/Nextrack2/index.html');
+  assert.equal(auth.searchParams.get('redirect_uri'), 'https://ddaawwoo.github.io/Nextrack2/');
   assert.equal(auth.searchParams.get('code_challenge_method'), 'S256');
   assert.ok(auth.searchParams.get('code_challenge'));
   assert.match(auth.searchParams.get('scope'), /files\.content\.read/);
@@ -101,6 +101,7 @@ test('initialize exchanges an OAuth callback code and stores only a session toke
   assert.equal(body.get('code'), 'abc');
   assert.equal(body.get('code_verifier'), 'verifier');
   assert.equal(body.get('client_id'), 'ro3534tr3nfa1fo');
+  assert.equal(body.get('redirect_uri'), 'https://ddaawwoo.github.io/Nextrack2/');
   assert.equal(env.historyCalls.length, 1);
 });
 
