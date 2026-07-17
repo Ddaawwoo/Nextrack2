@@ -700,6 +700,22 @@
 
         const audioEngine = document.getElementById('audioEngine');
 
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
+        }
+
+        function safeImageDataUrl(value) {
+            const image = String(value ?? '');
+            return /^data:image\/(?:png|jpe?g|gif|webp);base64,[a-z0-9+/=\s]+$/i.test(image)
+                ? image
+                : '';
+        }
+
         function setWaveformColor(colorName) {
             waveformColorMode = ['blue', 'green', 'red'].includes(colorName) ? colorName : 'blue';
             localStorage.setItem('dawomixWaveformColor', waveformColorMode);
@@ -850,7 +866,7 @@
                 item.onclick = () => importMegaFile(index);
                 item.innerHTML = `
                     <div class="truncate pr-2">
-                        <span class="text-[11px] font-bold text-[var(--color-text-main)] block truncate">${file.name || 'Audio soubor'}</span>
+                        <span class="text-[11px] font-bold text-[var(--color-text-main)] block truncate">${escapeHtml(file.name || 'Audio soubor')}</span>
                         <span class="text-[9px] text-[var(--color-text-secondary)] truncate block">${formatBytes(file.size || 0)}</span>
                     </div>
                     <div class="flex items-center space-x-2 text-[9px] font-mono shrink-0">
@@ -869,7 +885,7 @@
 
             try {
                 const list = document.getElementById('megaFileList');
-                list.innerHTML = `<p class="text-[10px] text-center text-[var(--color-text-secondary)]">Stahuji "${megaFile.name}" z MEGA...</p>`;
+                list.innerHTML = `<p class="text-[10px] text-center text-[var(--color-text-secondary)]">Stahuji "${escapeHtml(megaFile.name)}" z MEGA...</p>`;
                 const buffer = await megaFile.downloadBuffer({});
                 const file = new File([buffer], megaFile.name || 'mega-audio.mp3', {
                     type: getAudioMimeType(megaFile.name || '')
@@ -1547,7 +1563,7 @@
             if (!container) return;
 
             container.innerHTML = `
-                <input type="text" id="rename-input-${playlistId}" value="${playlist.name}" class="flex-1 bg-[var(--color-bg-main)] border border-[var(--color-accent-primary)] py-1 px-2 text-xs text-[var(--color-text-main)] focus:outline-none rounded-md" onkeydown="if(event.key === 'Enter') savePlaylistName(${playlistId}, event)">
+                <input type="text" id="rename-input-${playlistId}" value="${escapeHtml(playlist.name)}" class="flex-1 bg-[var(--color-bg-main)] border border-[var(--color-accent-primary)] py-1 px-2 text-xs text-[var(--color-text-main)] focus:outline-none rounded-md" onkeydown="if(event.key === 'Enter') savePlaylistName(${playlistId}, event)">
                 <button onclick="savePlaylistName(${playlistId}, event)" class="text-[var(--color-accent-primary)] hover:opacity-80">
                     <i data-lucide="check" class="w-4 h-4"></i>
                 </button>
@@ -1728,7 +1744,10 @@
             tracks.forEach(t => keyCounts[t.key] = (keyCounts[t.key] || 0) + 1);
             document.getElementById('statKey').innerText = Object.keys(keyCounts).reduce((a, b) => keyCounts[a] > keyCounts[b] ? a : b);
             
-            const analyzedEnergy = tracks.map(t => Number(t.energyScore)).filter(Number.isFinite);
+            const analyzedEnergy = tracks
+                .filter(t => t.energyScore !== null && t.energyScore !== undefined && t.energyScore !== '')
+                .map(t => Number(t.energyScore))
+                .filter(Number.isFinite);
             const averageEnergy = analyzedEnergy.length
                 ? analyzedEnergy.reduce((sum, value) => sum + value, 0) / analyzedEnergy.length / 10
                 : null;
@@ -1759,10 +1778,10 @@
                         <button onclick="playTrackFromLibrary(${track.id}, event)" class="p-1 rounded-full hover:bg-white/10 transition-colors">
                             <i data-lucide="${isPlaying ? 'volume-2' : 'play'}" class="w-4 h-4 ${isPlaying ? 'text-emerald-300' : 'text-emerald-400/80'} hover:text-emerald-300"></i>
                         </button>
-                        <span class="${getKeyColor(track.key)} text-[9px] font-mono font-bold min-w-5 text-center flex-shrink-0" title="Camelot klíč">${track.key ?? '--'}</span>
+                        <span class="${getKeyColor(track.key)} text-[9px] font-mono font-bold min-w-5 text-center flex-shrink-0" title="Camelot klíč">${escapeHtml(track.key ?? '--')}</span>
                         <div class="truncate flex-1">
-                            <h4 class="text-[11px] font-bold ${isPlaying ? 'text-[var(--color-accent-primary)]' : 'text-[var(--color-text-main)]'} truncate">${track.title}</h4>
-                            <p class="text-[9px] text-[var(--color-text-secondary)] truncate">${track.artist}</p>
+                            <h4 class="text-[11px] font-bold ${isPlaying ? 'text-[var(--color-accent-primary)]' : 'text-[var(--color-text-main)]'} truncate">${escapeHtml(track.title)}</h4>
+                            <p class="text-[9px] text-[var(--color-text-secondary)] truncate">${escapeHtml(track.artist)}</p>
                         </div>
                     </div>
                     <div class="flex items-center gap-1 text-[9px] font-mono text-[var(--color-text-secondary)] flex-shrink-0">
@@ -1812,7 +1831,7 @@
                         <div onclick="playPlaylistTrack(${pl.id}, ${indexInPl}, event)" class="p-2 flex items-center justify-between bg-[var(--color-bg-main)] border border-[var(--color-border)] hover:border-[var(--color-accent-primary)] cursor-pointer rounded-xl ${borderClass}">
                             <div class="truncate flex items-center space-x-2 min-w-0 flex-1">
                                 <i data-lucide="${isPlaying ? 'volume-2' : 'music'}" class="w-3.5 h-3.5 ${isPlaying ? 'text-[var(--color-accent-primary)]' : 'text-[var(--color-text-secondary)]'}"></i>
-                                <span class="text-[10px] ${isPlaying ? 'text-[var(--color-accent-primary)]' : 'text-[var(--color-text-main)]'} truncate">${track.title}</span>
+                                <span class="text-[10px] ${isPlaying ? 'text-[var(--color-accent-primary)]' : 'text-[var(--color-text-main)]'} truncate">${escapeHtml(track.title)}</span>
                             </div>
                             <div class="flex items-center space-x-2">
                                 <button onclick="moveTrackInPlaylist(${pl.id}, ${indexInPl}, 'up', event)" class="text-[8px] text-[var(--color-text-secondary)] hover:text-[var(--color-text-main)] leading-none">▲</button>
@@ -1826,10 +1845,11 @@
                     `;
                 });
 
+                const playlistImage = safeImageDataUrl(pl.image);
                 const imageHtml = `
                     <div class="w-24 h-24 relative flex-shrink-0 group">
-                        ${pl.image 
-                            ? `<div class="w-full h-full rounded-lg bg-cover bg-center" style="background-image: url('${pl.image}')"></div>`
+                        ${playlistImage
+                            ? `<div class="w-full h-full rounded-lg bg-cover bg-center" style="background-image: url('${playlistImage}')"></div>`
                             : `<div class="w-full h-full rounded-lg bg-[var(--color-bg-main)] flex items-center justify-center border border-dashed border-[var(--color-border)]">
                                    <i data-lucide="music" class="w-8 h-8 text-[var(--color-text-secondary)]/50"></i>
                                </div>`
@@ -1844,7 +1864,7 @@
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center justify-between border-b border-[var(--color-border)] pb-2 space-x-2">
                             <div id="playlist-name-container-${pl.id}" class="flex-1 min-w-0 flex items-center space-x-2">
-                                <span class="text-xs font-bold text-[var(--color-text-main)] uppercase tracking-wider truncate">${pl.name} (${plTracks.length})</span>
+                                <span class="text-xs font-bold text-[var(--color-text-main)] uppercase tracking-wider truncate">${escapeHtml(pl.name)} (${plTracks.length})</span>
                                 <button onclick="startRenamePlaylist(${pl.id}, event)" class="text-[var(--color-text-secondary)] hover:text-[var(--color-text-main)] transition-colors flex-shrink-0"><i data-lucide="pencil" class="w-3 h-3"></i></button>
                             </div>
                             <div class="flex items-center flex-shrink-0">
