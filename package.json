@@ -1,7 +1,8 @@
 {
-  "name": "nextrack2",
-  "version": "1.0.0",
-  "description": "Nextrack2 project",
+  "name": "hot-cue-lab",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Mobilní PWA pro automatickou detekci čtyř hot cue bodů podle waveformu.",
   "scripts": {
     "start": "npx serve .",
     "build": "node scripts/copy-web.mjs",
