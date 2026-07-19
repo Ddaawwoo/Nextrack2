@@ -15,6 +15,7 @@ function storage() {
 
 function loadIntegration({ href = 'https://ddaawwoo.github.io/Nextrack2/index.html', fetchImpl } = {}) {
   const assigned = [];
+  const replaced = [];
   const historyCalls = [];
   const sessionStorage = storage();
   const locationUrl = new URL(href);
@@ -25,6 +26,7 @@ function loadIntegration({ href = 'https://ddaawwoo.github.io/Nextrack2/index.ht
       pathname: locationUrl.pathname,
       search: locationUrl.search,
       assign: url => assigned.push(url),
+      replace: url => replaced.push(url),
     },
     history: {
       replaceState: (...args) => historyCalls.push(args),
@@ -53,7 +55,7 @@ function loadIntegration({ href = 'https://ddaawwoo.github.io/Nextrack2/index.ht
 
   const source = fs.readFileSync('dropbox-advanced.js', 'utf8');
   vm.runInNewContext(source, context, { filename: 'dropbox-advanced.js' });
-  return { integration: window.DropboxIntegration, assigned, historyCalls, sessionStorage, window };
+  return { integration: window.DropboxIntegration, assigned, replaced, historyCalls, sessionStorage, window };
 }
 
 test('signIn opens Dropbox OAuth with PKCE for each user', async () => {
@@ -103,6 +105,7 @@ test('initialize exchanges an OAuth callback code and stores only a session toke
   assert.equal(body.get('client_id'), 'ro3534tr3nfa1fo');
   assert.equal(body.get('redirect_uri'), 'https://ddaawwoo.github.io/Nextrack2/');
   assert.equal(env.historyCalls.length, 1);
+  assert.deepEqual(env.replaced, ['https://ddaawwoo.github.io/Nextrack2/']);
 });
 
 test('listAudioFiles follows pagination and filters supported audio', async () => {
