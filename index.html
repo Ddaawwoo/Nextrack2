@@ -458,24 +458,18 @@
                 min-height: 44px;
             }
             #bulkLibraryActions {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 7px;
+                display: flex;
+                flex-wrap: nowrap;
+                gap: 6px;
+                overflow-x: auto;
             }
             #bulkLibraryActions.hidden { display: none; }
             #selectedTracksCount {
-                grid-column: 2;
-                grid-row: 1;
-                align-self: center;
-                text-align: right;
-                padding-right: 3px;
+                display: none;
             }
-            #selectAllTracksButton { grid-column: 1; grid-row: 1; }
-            #analyzeSelectedButton { grid-column: 1; grid-row: 2; justify-content: center; }
-            #deleteSelectedButton { grid-column: 2; grid-row: 2; justify-content: center; }
-            #bulkLibraryActions #deleteSelectedButton { width: 40px; justify-self: end; }
             #bulkLibraryActions button {
-                width: 100%;
+                width: auto;
+                flex: 0 0 auto;
                 padding: 8px 7px !important;
                 font-size: 9px !important;
             }
@@ -819,17 +813,20 @@
                 </select>
             </div>
 
-            <div id="bulkLibraryActions" class="hidden items-center gap-2 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] p-2 rounded-xl">
+            <div id="bulkLibraryActions" class="hidden items-center flex-nowrap gap-2 overflow-x-auto bg-[var(--color-bg-secondary)] border border-[var(--color-border)] p-2 rounded-xl">
                 <button id="selectAllTracksButton" onclick="toggleSelectAllTracks()" class="flex items-center gap-1.5 px-2.5 py-2 text-[9px] font-bold text-[var(--color-text-main)] border border-[var(--color-border)] hover:border-[var(--color-accent-primary)] rounded-lg transition">
                     <i data-lucide="check-check" class="w-3.5 h-3.5"></i><span>Vybrat vše</span>
                 </button>
-                <span id="selectedTracksCount" class="flex-1 text-[9px] text-[var(--color-text-secondary)]">Vybráno: 0</span>
                 <button id="analyzeSelectedButton" onclick="analyzeSelectedTracks()" disabled class="flex items-center gap-1.5 px-2.5 py-2 text-[9px] font-bold bg-[var(--color-accent-primary)] text-black disabled:opacity-40 disabled:cursor-not-allowed rounded-lg transition">
-                    <i data-lucide="cpu" class="w-3.5 h-3.5"></i><span>Lokální analýza</span>
+                    <i data-lucide="cpu" class="w-3.5 h-3.5"></i><span>Analyzovat vše</span>
+                </button>
+                <button id="addSelectedToPlaylistButton" onclick="openSelectedPlaylistModal()" disabled class="flex items-center gap-1.5 px-2.5 py-2 text-[9px] font-bold text-[var(--color-text-main)] border border-[var(--color-accent-tertiary)] hover:bg-[var(--color-accent-tertiary)]/10 disabled:opacity-40 disabled:cursor-not-allowed rounded-lg transition">
+                    <i data-lucide="list-plus" class="w-3.5 h-3.5"></i><span>Přidat do playlistu</span>
                 </button>
                 <button id="deleteSelectedButton" onclick="deleteSelectedTracks()" disabled class="w-10 h-10 flex items-center justify-center bg-red-500/15 border border-red-500/40 text-red-400 hover:text-red-300 hover:bg-red-500/25 disabled:opacity-40 disabled:cursor-not-allowed rounded-lg transition" title="Odstranit vybrané skladby" aria-label="Odstranit vybrané skladby">
                     <i data-lucide="trash-2" class="w-4 h-4"></i>
                 </button>
+                <span id="selectedTracksCount" class="ml-auto flex-shrink-0 text-[9px] text-[var(--color-text-secondary)]">Vybráno: 0</span>
             </div>
 
             <!-- Prázdný stav / Seznam skladeb -->
@@ -1025,7 +1022,7 @@
         let editingPlaylistId = null;
         let editingTrackId = null;
         const genres = ['House', 'Techno', 'Trance', 'D&B', 'Dubstep', 'Ambient', 'Hip-hop', 'Pop', 'Ostatní'];
-        let trackIdToAddToPlaylist = null;
+        let trackIdsToAddToPlaylist = [];
         let currentObjectURL = null; // New global variable to store the current object URL
         let audioAnalysisContext = null;
         const analyzingTrackIds = new Set();
@@ -1516,6 +1513,8 @@
             if (selectAllLabel) selectAllLabel.textContent = tracks.length > 0 && count === tracks.length ? 'Zrušit výběr' : 'Vybrat vše';
             const analyzeButton = document.getElementById('analyzeSelectedButton');
             if (analyzeButton && !analyzeButton.dataset.running) analyzeButton.disabled = count === 0;
+            const playlistButton = document.getElementById('addSelectedToPlaylistButton');
+            if (playlistButton) playlistButton.disabled = count === 0 || Boolean(analyzeButton?.dataset.running);
             const deleteButton = document.getElementById('deleteSelectedButton');
             if (deleteButton) deleteButton.disabled = count === 0 || Boolean(analyzeButton?.dataset.running);
         }
@@ -1609,7 +1608,7 @@
                 }
             }
             delete button.dataset.running;
-            label.textContent = 'Lokální analýza';
+            label.textContent = 'Analyzovat vše';
             updateBulkLibraryActions();
             loadDataFromDB();
             if (failed) alert(`Analýza dokončena. Nezdařilo se analyzovat ${failed} skladeb.\n\n${failureMessages.slice(0, 3).join('\n')}`);
@@ -1907,7 +1906,17 @@
 
         function openPlaylistSelectModal(trackId, event) {
             event.stopPropagation();
-            trackIdToAddToPlaylist = trackId;
+            trackIdsToAddToPlaylist = [trackId];
+            renderPlaylistSelection();
+        }
+
+        function openSelectedPlaylistModal() {
+            trackIdsToAddToPlaylist = [...selectedTrackIds];
+            if (!trackIdsToAddToPlaylist.length) return;
+            renderPlaylistSelection();
+        }
+
+        function renderPlaylistSelection() {
             const list = document.getElementById('playlistSelectList');
             list.innerHTML = "";
 
@@ -1927,24 +1936,28 @@
 
         function closePlaylistSelectModal() {
             document.getElementById('playlistSelectModal').classList.add('hidden');
-            trackIdToAddToPlaylist = null;
+            trackIdsToAddToPlaylist = [];
         }
 
         function addTrackToPlaylist(playlistId) {
             const playlist = playlists.find(p => p.id === playlistId);
-            if (!playlist || !trackIdToAddToPlaylist) return;
+            if (!playlist || !trackIdsToAddToPlaylist.length) return;
 
-            if (!playlist.trackIds.includes(trackIdToAddToPlaylist)) {
-                playlist.trackIds.push(trackIdToAddToPlaylist);
-                const transaction = db.transaction(["playlists"], "readwrite");
-                transaction.objectStore("playlists").put(playlist).onsuccess = () => {
-                    closePlaylistSelectModal();
-                    loadDataFromDB();
-                };
-            } else {
-                alert("Tato skladba už v playlistu je!");
+            const existingIds = new Set(playlist.trackIds);
+            const newIds = trackIdsToAddToPlaylist.filter(id => !existingIds.has(id));
+            if (!newIds.length) {
+                alert("Všechny vybrané skladby už v playlistu jsou.");
                 closePlaylistSelectModal();
+                return;
             }
+
+            playlist.trackIds.push(...newIds);
+            const transaction = db.transaction(["playlists"], "readwrite");
+            transaction.objectStore("playlists").put(playlist).onsuccess = () => {
+                closePlaylistSelectModal();
+                loadDataFromDB();
+                alert(`Do playlistu bylo přidáno ${newIds.length} skladeb.`);
+            };
         }
 
         function removeTrackFromPlaylist(playlistId, trackId, event) {
