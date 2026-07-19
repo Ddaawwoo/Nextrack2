@@ -3,6 +3,18 @@
   "version": "1.0.0",
   "description": "Nextrack2 project",
   "scripts": {
-    "start": "npx serve ."
+    "start": "npx serve .",
+    "build": "node scripts/copy-web.mjs",
+    "android:prepare": "node scripts/prepare-android.mjs",
+    "android:sync": "npm run build && cap sync android",
+    "android:open": "npm run android:sync && cap open android",
+    "android:apk": "npm run android:prepare && npm run android:sync && cd android && ./gradlew assembleDebug"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.4.4",
+    "@capacitor/core": "^7.4.4"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.4.4"
   }
 }

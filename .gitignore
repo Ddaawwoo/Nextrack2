@@ -1,3 +1,10 @@
+node_modules/
+www/
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+.idea/
+*.iml
 __pycache__/
-*.py[cod]
-.env
+*.pyc
