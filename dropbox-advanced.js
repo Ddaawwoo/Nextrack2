@@ -229,41 +229,74 @@ window.DropboxIntegration = (() => {
     function chooseFiles(files) {
         return new Promise(resolve => {
             const overlay = document.createElement('div');
-            overlay.className = 'fixed inset-0 bg-black/80 z-[120] flex items-center justify-center p-4 backdrop-blur-sm';
+            overlay.className = 'fixed inset-0 bg-black/75 z-[120] flex items-end sm:items-center justify-center sm:p-4 backdrop-blur-md';
             const panel = document.createElement('div');
-            panel.className = 'bg-[var(--color-bg-secondary)] border border-[var(--color-border)] w-full max-w-sm max-h-[85vh] p-5 rounded-2xl shadow-2xl flex flex-col gap-4';
+            panel.className = 'bg-[var(--color-bg-secondary)] border border-[var(--color-border)] w-full sm:max-w-md h-[92dvh] sm:h-[min(46rem,88dvh)] rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden';
 
-            const title = document.createElement('h3');
-            title.className = 'text-xs font-bold uppercase tracking-wider border-b border-[var(--color-border)] pb-2';
-            title.textContent = 'Vyber skladby z Dropboxu';
-            panel.appendChild(title);
+            const header = document.createElement('div');
+            header.className = 'px-4 pt-4 pb-3 border-b border-[var(--color-border)] bg-[var(--color-bg-secondary)]';
+            header.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-[#0061ff] text-white flex items-center justify-center shrink-0">
+                        <svg viewBox="0 0 24 24" class="w-6 h-6 fill-current" aria-hidden="true"><path d="m6 3-6 4 6 4 6-4-6-4Zm12 0-6 4 6 4 6-4-6-4ZM6 12l-6 4 6 4 6-4-6-4Zm12 0-6 4 6 4 6-4-6-4Zm-6 5.5-6 4 6 2.5 6-2.5-6-4Z"/></svg>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <h3 class="text-base font-black text-[var(--color-text-main)]">Dropbox</h3>
+                        <p class="text-[11px] text-[var(--color-text-secondary)]">Vyber hudbu, kterou chceš přidat</p>
+                    </div>
+                    <button type="button" data-close class="w-11 h-11 rounded-xl border border-[var(--color-border)] flex items-center justify-center text-[var(--color-text-secondary)]" aria-label="Zavřít">✕</button>
+                </div>`;
+            panel.appendChild(header);
+
+            const tools = document.createElement('div');
+            tools.className = 'px-4 py-3 space-y-2 border-b border-[var(--color-border)]';
+            tools.innerHTML = `
+                <label class="flex items-center gap-2.5 h-11 px-3 rounded-xl bg-[var(--color-bg-main)] border border-[var(--color-border)] focus-within:border-[#0061ff]">
+                    <span class="text-[var(--color-text-secondary)]">⌕</span>
+                    <input data-search type="search" placeholder="Hledat skladby…" class="w-full bg-transparent outline-none text-sm text-[var(--color-text-main)] placeholder:text-[var(--color-text-secondary)]">
+                </label>
+                <div class="flex items-center justify-between text-[11px]">
+                    <span data-found class="text-[var(--color-text-secondary)]">${files.length} skladeb</span>
+                    <button type="button" data-select-all class="min-h-9 px-3 font-bold text-[#5b8cff]">Vybrat vše</button>
+                </div>`;
+            panel.appendChild(tools);
 
             const list = document.createElement('div');
-            list.className = 'space-y-2 overflow-y-auto flex-1';
+            list.className = 'p-3 space-y-2 overflow-y-auto flex-1 overscroll-contain';
             files.forEach((file, index) => {
                 const label = document.createElement('label');
-                label.className = 'flex items-center gap-3 p-2.5 bg-[var(--color-bg-main)] border border-[var(--color-border)] rounded-xl text-xs';
+                label.dataset.searchText = `${file.name || ''} ${file.path_display || ''}`.toLocaleLowerCase('cs');
+                label.className = 'flex items-center gap-3 min-h-16 p-3 bg-[var(--color-bg-main)] border border-[var(--color-border)] rounded-2xl text-xs active:scale-[.99] transition';
                 const checkbox = document.createElement('input');
                 checkbox.type = 'checkbox';
                 checkbox.value = String(index);
-                checkbox.className = 'accent-[var(--color-accent-primary)]';
-                const name = document.createElement('span');
-                name.className = 'truncate';
+                checkbox.className = 'w-5 h-5 shrink-0 accent-[#0061ff]';
+                const icon = document.createElement('span');
+                icon.className = 'w-9 h-9 rounded-xl bg-[#0061ff]/10 text-[#5b8cff] flex items-center justify-center shrink-0 text-base';
+                icon.textContent = '♪';
+                const text = document.createElement('span');
+                text.className = 'min-w-0 flex-1';
+                const name = document.createElement('strong');
+                name.className = 'block truncate text-[13px] text-[var(--color-text-main)]';
                 name.textContent = file.name;
-                label.append(checkbox, name);
+                const path = document.createElement('small');
+                path.className = 'block truncate mt-1 text-[10px] font-normal text-[var(--color-text-secondary)]';
+                path.textContent = file.path_display || 'Dropbox';
+                text.append(name, path);
+                label.append(checkbox, icon, text);
                 list.appendChild(label);
             });
             panel.appendChild(list);
 
             const actions = document.createElement('div');
-            actions.className = 'grid grid-cols-2 gap-2';
+            actions.className = 'p-4 border-t border-[var(--color-border)] bg-[var(--color-bg-secondary)]';
             const cancel = document.createElement('button');
-            cancel.className = 'py-2.5 border border-[var(--color-border)] rounded-lg text-xs';
-            cancel.textContent = 'Zrušit';
+            cancel.className = 'hidden';
             const confirm = document.createElement('button');
-            confirm.className = 'py-2.5 bg-[#0061ff] text-white font-bold rounded-lg text-xs';
-            confirm.textContent = 'Importovat vybrané';
-            actions.append(cancel, confirm);
+            confirm.className = 'w-full min-h-12 px-4 bg-[#0061ff] disabled:bg-[var(--color-border)] disabled:text-[var(--color-text-secondary)] text-white font-black rounded-2xl text-sm shadow-lg shadow-blue-600/20 transition';
+            confirm.disabled = true;
+            confirm.textContent = 'Vyber skladby';
+            actions.append(confirm);
             panel.appendChild(actions);
             overlay.appendChild(panel);
             document.body.appendChild(overlay);
@@ -272,8 +305,31 @@ window.DropboxIntegration = (() => {
                 overlay.remove();
                 resolve(selected);
             };
-            cancel.onclick = () => finish([]);
+            const updateSelection = () => {
+                const count = list.querySelectorAll('input:checked').length;
+                confirm.disabled = count === 0;
+                confirm.textContent = count ? `Přidat vybrané (${count})` : 'Vyber skladby';
+            };
+            list.addEventListener('change', updateSelection);
+            header.querySelector('[data-close]').onclick = () => finish([]);
             overlay.onclick = event => { if (event.target === overlay) finish([]); };
+            tools.querySelector('[data-search]').oninput = event => {
+                const query = event.target.value.trim().toLocaleLowerCase('cs');
+                let visible = 0;
+                list.querySelectorAll('label').forEach(row => {
+                    const show = !query || row.dataset.searchText.includes(query);
+                    row.classList.toggle('hidden', !show);
+                    if (show) visible += 1;
+                });
+                tools.querySelector('[data-found]').textContent = `${visible} skladeb`;
+            };
+            tools.querySelector('[data-select-all]').onclick = event => {
+                const visibleBoxes = [...list.querySelectorAll('label:not(.hidden) input')];
+                const shouldSelect = visibleBoxes.some(input => !input.checked);
+                visibleBoxes.forEach(input => { input.checked = shouldSelect; });
+                event.currentTarget.textContent = shouldSelect ? 'Zrušit výběr' : 'Vybrat vše';
+                updateSelection();
+            };
             confirm.onclick = () => {
                 const selected = [...list.querySelectorAll('input:checked')]
                     .map(input => files[Number(input.value)])
