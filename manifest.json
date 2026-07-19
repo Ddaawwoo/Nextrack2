@@ -1,22 +1,14 @@
 {
-  "name": "Dawomix - Pro DJ Library",
-  "short_name": "Dawomix",
-  "description": "Profesionální knihovna pro DJe.",
+  "name": "Hot Cue Lab",
+  "short_name": "Hot Cue",
+  "description": "Mobilní DJ nástroj pro automatickou detekci čtyř hot cue bodů podle waveformu.",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#0d0e15",
-  "theme_color": "#22d3ee",
+  "orientation": "portrait-primary",
+  "background_color": "#070a12",
+  "theme_color": "#070a12",
   "icons": [
-    {
-      "src": "icons/icon-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "icons/icon-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
+    {"src":"icons/icon-192x192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
+    {"src":"icons/icon-512x512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
   ]
 }
