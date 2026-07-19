@@ -52,6 +52,17 @@ window.DropboxIntegration = (() => {
         window.history.replaceState({}, typeof document === 'undefined' ? '' : document.title, cleanPath);
     }
 
+    function reloadAfterOAuthCallback() {
+        // A full navigation is intentional. Some Android/MIUI WebViews retain the
+        // zoom level of the Dropbox authorization page when only history is changed.
+        // Reloading the canonical app URL reapplies the mobile viewport and layout.
+        if (typeof window.location.replace === 'function') {
+            window.location.replace(redirectUri());
+            return true;
+        }
+        return false;
+    }
+
     function updateSignInStatus() {
         if (typeof document !== 'undefined') {
             document.dispatchEvent(new CustomEvent('dropbox-signin-changed', {
@@ -104,6 +115,7 @@ window.DropboxIntegration = (() => {
             }
             await exchangeAuthorizationCode(code, verifier);
             cleanOAuthParameters();
+            if (reloadAfterOAuthCallback()) return true;
         }
 
         accessToken = sessionStorage.getItem(STORAGE.TOKEN);
