@@ -7,6 +7,7 @@ const files = [
   'gdrive-advanced.js',
   'dropbox-advanced.js',
   'logo.png',
+  'splash-screen.jpg',
   'source.png',
   'mega.png',
   'googledrive.png',

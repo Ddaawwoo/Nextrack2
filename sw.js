@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dawomix-v26'; // Změň verzi, pokud aktualizuješ soubory
+const CACHE_NAME = 'dawomix-v27'; // Změň verzi, pokud aktualizuješ soubory
 const urlsToCache = [
     './',
     './index.html',
@@ -8,6 +8,7 @@ const urlsToCache = [
     './icons/icon-192x192.png',
     './icons/icon-512x512.png',
     './logo.png',
+    './splash-screen.jpg',
     './source.png',
     './mega.png',
     './googledrive.png',
