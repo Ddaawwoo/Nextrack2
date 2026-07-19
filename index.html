@@ -815,6 +815,9 @@
             </div>
 
             <div id="bulkLibraryActions" class="hidden items-center flex-nowrap gap-2 overflow-x-auto bg-[var(--color-bg-secondary)] border border-[var(--color-border)] p-2 rounded-xl">
+                <button id="selectAllTracksButton" onclick="toggleSelectAllTracks()" class="h-10 min-w-0 flex-1 flex items-center justify-center gap-1 px-1.5 text-[8px] font-bold text-[var(--color-text-main)] border border-[var(--color-border)] hover:border-[var(--color-accent-primary)] rounded-lg transition">
+                    <i data-lucide="check-check" class="w-3.5 h-3.5 flex-shrink-0"></i><span>Vybrat vše</span>
+                </button>
                 <button id="analyzeSelectedButton" onclick="analyzeSelectedTracks()" disabled class="h-10 min-w-0 flex-1 flex items-center justify-center gap-1.5 px-2.5 py-2 text-[9px] font-bold bg-[var(--color-accent-primary)] text-black disabled:opacity-40 disabled:cursor-not-allowed rounded-lg transition">
                     <i data-lucide="cpu" class="w-3.5 h-3.5"></i><span>Analyzovat</span>
                 </button>
