@@ -814,7 +814,7 @@
                 </select>
             </div>
 
-            <div id="bulkLibraryActions" class="hidden grid-cols-[repeat(3,minmax(0,1fr))_2.75rem] items-center gap-2">
+            <div id="bulkLibraryActions" class="hidden grid-cols-4 items-center gap-2">
                 <button id="selectAllTracksButton" onclick="toggleSelectAllTracks()" class="h-10 min-w-0 flex-1 flex items-center justify-center gap-1 px-1.5 text-[8px] font-bold text-[var(--color-text-main)] border border-[var(--color-border)] hover:border-[var(--color-accent-primary)] rounded-lg transition">
                     <i data-lucide="check-check" class="w-3.5 h-3.5 flex-shrink-0"></i><span>Vybrat vše</span>
                 </button>
@@ -824,8 +824,8 @@
                 <button id="addSelectedToPlaylistButton" onclick="openSelectedPlaylistModal()" disabled class="h-10 min-w-0 flex-1 flex items-center justify-center gap-1.5 px-2.5 py-2 text-[9px] font-bold text-[var(--color-text-main)] border border-[var(--color-accent-tertiary)] hover:bg-[var(--color-accent-tertiary)]/10 disabled:opacity-40 disabled:cursor-not-allowed rounded-lg transition">
                     <i data-lucide="list-plus" class="w-3.5 h-3.5 flex-shrink-0"></i><span>Přidat do playlistu</span>
                 </button>
-                <button id="deleteSelectedButton" onclick="deleteSelectedTracks()" disabled class="h-10 w-11 flex items-center justify-center bg-red-500/80 border border-red-400/50 text-white hover:bg-red-500 disabled:opacity-40 disabled:cursor-not-allowed rounded-lg transition" title="Odstranit vybrané skladby" aria-label="Odstranit vybrané skladby">
-                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                <button id="deleteSelectedButton" onclick="deleteSelectedTracks()" disabled class="h-10 min-w-0 flex items-center justify-center gap-1 px-1.5 bg-red-500/80 border border-red-400/50 text-white font-bold text-[8px] hover:bg-red-500 disabled:opacity-40 disabled:cursor-not-allowed rounded-lg transition" title="Odstranit vybrané skladby" aria-label="Odstranit vybrané skladby">
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5 flex-shrink-0"></i><span>Smazat</span>
                 </button>
             </div>
 
