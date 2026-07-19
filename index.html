@@ -823,10 +823,10 @@
                 <button id="addSelectedToPlaylistButton" onclick="openSelectedPlaylistModal()" disabled class="flex items-center gap-1.5 px-2.5 py-2 text-[9px] font-bold text-[var(--color-text-main)] border border-[var(--color-accent-tertiary)] hover:bg-[var(--color-accent-tertiary)]/10 disabled:opacity-40 disabled:cursor-not-allowed rounded-lg transition">
                     <i data-lucide="list-plus" class="w-3.5 h-3.5"></i><span>Přidat do playlistu</span>
                 </button>
-                <button id="deleteSelectedButton" onclick="deleteSelectedTracks()" disabled class="w-10 h-10 flex items-center justify-center bg-red-500/15 border border-red-500/40 text-red-400 hover:text-red-300 hover:bg-red-500/25 disabled:opacity-40 disabled:cursor-not-allowed rounded-lg transition" title="Odstranit vybrané skladby" aria-label="Odstranit vybrané skladby">
+                <span id="selectedTracksCount" class="flex-shrink-0 text-[9px] text-[var(--color-text-secondary)]">Vybráno: 0</span>
+                <button id="deleteSelectedButton" onclick="deleteSelectedTracks()" disabled class="ml-auto w-10 h-10 flex-shrink-0 flex items-center justify-center bg-red-500/15 border border-red-500/40 text-red-400 hover:text-red-300 hover:bg-red-500/25 disabled:opacity-40 disabled:cursor-not-allowed rounded-lg transition" title="Odstranit vybrané skladby" aria-label="Odstranit vybrané skladby">
                     <i data-lucide="trash-2" class="w-4 h-4"></i>
                 </button>
-                <span id="selectedTracksCount" class="ml-auto flex-shrink-0 text-[9px] text-[var(--color-text-secondary)]">Vybráno: 0</span>
             </div>
 
             <!-- Prázdný stav / Seznam skladeb -->
