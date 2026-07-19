@@ -800,6 +800,7 @@
                     <i data-lucide="search" class="w-4 h-4 text-[var(--color-text-secondary)] absolute left-3.5 top-3"></i>
                     <input type="text" id="searchInput" oninput="filterTracks()" placeholder="Vyhledat v knihovně..." class="w-full bg-[var(--color-bg-secondary)] border border-[var(--color-border)] py-2.5 pl-10 pr-4 text-xs text-[var(--color-text-main)] focus:outline-none focus:border-[var(--color-accent-secondary)] rounded-xl transition">
                 </div>
+                <span id="selectedTracksCount" class="flex-shrink-0 self-center text-[9px] text-[var(--color-text-secondary)]">Vybráno: 0</span>
                 <button id="filterButton" onclick="toggleFilterPanel()" class="w-11 flex items-center justify-center bg-[#101116] border border-white/10 text-[var(--color-text-secondary)] hover:text-[var(--color-accent-secondary)] hover:border-[var(--color-accent-secondary)] rounded-xl transition" title="Řadit skladby">
                     <i data-lucide="arrow-up-down" class="w-4 h-4"></i>
                 </button>
@@ -814,17 +815,13 @@
             </div>
 
             <div id="bulkLibraryActions" class="hidden items-center flex-nowrap gap-2 overflow-x-auto bg-[var(--color-bg-secondary)] border border-[var(--color-border)] p-2 rounded-xl">
-                <button id="selectAllTracksButton" onclick="toggleSelectAllTracks()" class="flex items-center gap-1.5 px-2.5 py-2 text-[9px] font-bold text-[var(--color-text-main)] border border-[var(--color-border)] hover:border-[var(--color-accent-primary)] rounded-lg transition">
-                    <i data-lucide="check-check" class="w-3.5 h-3.5"></i><span>Vybrat vše</span>
+                <button id="analyzeSelectedButton" onclick="analyzeSelectedTracks()" disabled class="h-10 min-w-0 flex-1 flex items-center justify-center gap-1.5 px-2.5 py-2 text-[9px] font-bold bg-[var(--color-accent-primary)] text-black disabled:opacity-40 disabled:cursor-not-allowed rounded-lg transition">
+                    <i data-lucide="cpu" class="w-3.5 h-3.5"></i><span>Analyzovat</span>
                 </button>
-                <button id="analyzeSelectedButton" onclick="analyzeSelectedTracks()" disabled class="flex items-center gap-1.5 px-2.5 py-2 text-[9px] font-bold bg-[var(--color-accent-primary)] text-black disabled:opacity-40 disabled:cursor-not-allowed rounded-lg transition">
-                    <i data-lucide="cpu" class="w-3.5 h-3.5"></i><span>Analyzovat vše</span>
-                </button>
-                <span id="selectedTracksCount" class="flex-shrink-0 text-[9px] text-[var(--color-text-secondary)]">Vybráno: 0</span>
-                <button id="addSelectedToPlaylistButton" onclick="openSelectedPlaylistModal()" disabled class="flex items-center gap-1.5 px-2.5 py-2 text-[9px] font-bold text-[var(--color-text-main)] border border-[var(--color-accent-tertiary)] hover:bg-[var(--color-accent-tertiary)]/10 disabled:opacity-40 disabled:cursor-not-allowed rounded-lg transition">
+                <button id="addSelectedToPlaylistButton" onclick="openSelectedPlaylistModal()" disabled class="h-10 min-w-0 flex-1 flex items-center justify-center gap-1.5 px-2.5 py-2 text-[9px] font-bold text-[var(--color-text-main)] border border-[var(--color-accent-tertiary)] hover:bg-[var(--color-accent-tertiary)]/10 disabled:opacity-40 disabled:cursor-not-allowed rounded-lg transition">
                     <i data-lucide="list-plus" class="w-3.5 h-3.5"></i><span>Přidat do playlistu</span>
                 </button>
-                <button id="deleteSelectedButton" onclick="deleteSelectedTracks()" disabled class="h-10 flex-shrink-0 flex items-center justify-center gap-1.5 px-3 bg-red-500/80 border border-red-400/50 text-white font-bold text-[9px] hover:bg-red-500 disabled:opacity-40 disabled:cursor-not-allowed rounded-lg transition" title="Odstranit vybrané skladby" aria-label="Odstranit vybrané skladby">
+                <button id="deleteSelectedButton" onclick="deleteSelectedTracks()" disabled class="h-10 min-w-0 flex-1 flex items-center justify-center gap-1.5 px-2.5 bg-red-500/80 border border-red-400/50 text-white font-bold text-[9px] hover:bg-red-500 disabled:opacity-40 disabled:cursor-not-allowed rounded-lg transition" title="Odstranit vybrané skladby" aria-label="Odstranit vybrané skladby">
                     <i data-lucide="trash-2" class="w-4 h-4"></i><span>Smazat</span>
                 </button>
             </div>
