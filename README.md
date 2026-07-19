@@ -1,26 +1,27 @@
-# Dawomix / Nextrack2
+# Hot Cue Lab
 
-Mobilní DJ knihovna jako PWA a nativní Android aplikace přes Capacitor.
+Mobilní webová aplikace ve vizuálním duchu Nextrack2, zaměřená na automatické vytváření čtyř DJ hot cue bodů podle waveformu.
 
-## Android APK
+## Funkce
 
-Požadavky: Node.js 22, Java 21 a Android SDK.
+- lokální načtení MP3, WAV, M4A nebo OGG
+- vykreslení waveformu v prohlížeči
+- automatická detekce 4 výrazných cue bodů
+- heuristika založená na RMS energii a změnách nástupu
+- nastavitelná citlivost a minimální rozestup bodů
+- ruční posun cue markerů přímo na waveformu
+- okamžité přehrávání od vybraného cue bodu
+- mobilní PWA a offline základ přes service worker
 
-```bash
-npm ci
-npm run android:apk
-```
-
-Výsledný instalační soubor je v:
-
-```text
-android/app/build/outputs/apk/debug/app-debug.apk
-```
-
-Workflow **Android APK** na GitHubu sestaví stejný soubor automaticky a uloží ho jako artefakt `Dawomix-debug-apk`.
-
-Pro otevření projektu v Android Studiu použijte:
+## Spuštění
 
 ```bash
-npm run android:open
+npm install
+npm start
 ```
+
+Analýza audia probíhá pouze v zařízení. Skladba se nikam neodesílá.
+
+## Stav
+
+První funkční prototyp. Další vhodný krok je přesnější beat-grid/onset detekce přes Essentia.js a export cue bodů do Rekordbox XML.
