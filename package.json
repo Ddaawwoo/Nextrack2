@@ -1,0 +1,8 @@
+{
+  "name": "nextrack2",
+  "version": "1.0.0",
+  "description": "Nextrack2 project",
+  "scripts": {
+    "start": "npx serve ."
+  }
+}

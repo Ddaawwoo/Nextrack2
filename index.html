@@ -18,6 +18,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Lokální audio analýza BPM a tóniny přes Essentia WebAssembly -->
+    <script src="https://cdn.jsdelivr.net/npm/essentia.js@0.1.3/dist/essentia-wasm.web.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/essentia.js@0.1.3/dist/essentia.js-core.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/megajs@1.3.10/dist/main.browser-umd.js"></script>
     <script src="gdrive-advanced.js"></script>
     <script src="dropbox-advanced.js"></script>
@@ -33,6 +36,7 @@
             --color-accent-secondary: #d946ef;
             --color-accent-tertiary: #fbbf24;
             --color-accent-danger: #fb4f67;
+            --app-background-image: radial-gradient(circle at 15% 15%, rgb(34 211 238 / .16), transparent 34%), radial-gradient(circle at 85% 75%, rgb(217 70 239 / .13), transparent 38%);
         }
         [data-theme="forest"] {
             --color-bg-main: #07120d;
@@ -45,6 +49,7 @@
             --color-accent-secondary: #a3e635;
             --color-accent-tertiary: #fbbf24;
             --color-accent-danger: #fb7185;
+            --app-background-image: radial-gradient(circle at 18% 18%, rgb(52 211 153 / .18), transparent 36%), radial-gradient(circle at 82% 78%, rgb(163 230 53 / .12), transparent 40%);
         }
         [data-theme="ocean"] {
             --color-bg-main: #050d1c;
@@ -57,6 +62,7 @@
             --color-accent-secondary: #2dd4bf;
             --color-accent-tertiary: #818cf8;
             --color-accent-danger: #fb7185;
+            --app-background-image: radial-gradient(circle at 20% 12%, rgb(56 189 248 / .20), transparent 38%), radial-gradient(circle at 80% 82%, rgb(45 212 191 / .13), transparent 42%);
         }
         [data-theme="sunset"] {
             --color-bg-main: #190714;
@@ -69,6 +75,7 @@
             --color-accent-secondary: #f97316;
             --color-accent-tertiary: #facc15;
             --color-accent-danger: #f43f5e;
+            --app-background-image: radial-gradient(circle at 16% 18%, rgb(251 113 133 / .20), transparent 36%), radial-gradient(circle at 84% 76%, rgb(249 115 22 / .16), transparent 40%);
         }
         [data-theme="matrix"] {
             --color-bg-main: #000000;
@@ -81,18 +88,7 @@
             --color-accent-secondary: #39FF14; /* Lighter Green */
             --color-accent-tertiary: #22d3ee; /* cyan-400 */
             --color-accent-danger: #00FF41;
-        }
-        [data-theme="arctic"] {
-            --color-bg-main: #0b111b;
-            --color-bg-secondary: #172231;
-            --color-border: #385064;
-            --color-text-main: #f0f9ff;
-            --color-text-secondary: #9bb5c7;
-            --color-accent-primary: #7dd3fc;
-            --color-accent-primary-rgb: 125, 211, 252;
-            --color-accent-secondary: #e0f2fe;
-            --color-accent-tertiary: #a78bfa;
-            --color-accent-danger: #fb7185;
+            --app-background-image: repeating-linear-gradient(0deg, rgb(0 255 65 / .025) 0, rgb(0 255 65 / .025) 1px, transparent 1px, transparent 4px), radial-gradient(circle at 50% 20%, rgb(0 255 65 / .13), transparent 48%);
         }
         [data-theme="club"] {
             --color-bg-main: #06030d;
@@ -105,10 +101,14 @@
             --color-accent-secondary: #ff2bd6;
             --color-accent-tertiary: #b7ff2a;
             --color-accent-danger: #ff3b6b;
+            --app-background-image: radial-gradient(circle at 18% 15%, rgb(0 229 255 / .18), transparent 34%), radial-gradient(circle at 82% 22%, rgb(255 43 214 / .16), transparent 38%), radial-gradient(circle at 55% 88%, rgb(183 255 42 / .09), transparent 38%);
         }
         body {
             touch-action: manipulation;
             -webkit-tap-highlight-color: transparent;
+            background-color: var(--color-bg-main);
+            background-image: var(--app-background-image);
+            background-attachment: fixed;
         }
         body.custom-background {
             background-image: linear-gradient(rgb(0 0 0 / var(--background-dim-opacity, .74)), rgb(0 0 0 / var(--background-dim-opacity, .74))), var(--custom-background-image);
@@ -132,6 +132,42 @@
             background: color-mix(in srgb, var(--color-bg-secondary) 80%, transparent) !important;
             backdrop-filter: blur(8px);
         }
+        .theme-choice {
+            min-height: 46px;
+            padding: 8px 10px;
+            background: color-mix(in srgb, var(--color-bg-main) 72%, transparent);
+            font-size: 10px;
+            font-weight: 700;
+        }
+        .theme-choice:hover { background: color-mix(in srgb, var(--color-accent-primary) 8%, var(--color-bg-main)); }
+        .theme-choice i {
+            display: block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--color-bg-secondary);
+            border-radius: 999px;
+            box-shadow: 0 0 0 1px rgb(255 255 255 / .12);
+        }
+        .waveform-choice {
+            min-height: 54px;
+            padding: 7px 4px;
+            background: color-mix(in srgb, var(--color-bg-main) 72%, transparent);
+            text-align: center;
+        }
+        .waveform-choice > i {
+            display: block;
+            width: 28px;
+            height: 10px;
+            margin: 0 auto 6px;
+            border-radius: 999px;
+            background: var(--wave-color);
+            box-shadow: 0 0 10px color-mix(in srgb, var(--wave-color) 75%, transparent);
+        }
+        .waveform-choice > i.rainbow {
+            background: linear-gradient(90deg, #22d3ee, #65f20d, #ffd43b, #ff382e, #a855f7);
+            box-shadow: 0 0 10px rgb(168 85 247 / .45);
+        }
+        .waveform-choice span { display: block; font-size: 8px; font-weight: 700; }
         /* Stylování range slideru s kulatým běžcem a neonovou září */
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
@@ -213,6 +249,36 @@
         footer {
             padding-bottom: env(safe-area-inset-bottom);
         }
+        .modal-panel {
+            width: min(100%, calc(100vw - 2rem));
+            max-height: min(90dvh, 52rem);
+            overscroll-behavior: contain;
+        }
+        .modal-panel h3 {
+            font-size: 14px;
+            line-height: 1.35;
+        }
+        .modal-panel button:not(.theme-choice):not(.waveform-choice) svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+        }
+        .track-row > div:last-child button {
+            width: 34px;
+            height: 34px;
+        }
+        .track-row > div:last-child button svg {
+            width: 17px;
+            height: 17px;
+        }
+        #bulkLibraryActions button {
+            min-height: 38px;
+            white-space: nowrap;
+        }
+        #bulkLibraryActions button svg {
+            width: 16px;
+            height: 16px;
+        }
 
         @media (max-width: 420px) {
             header {
@@ -255,21 +321,23 @@
                 min-height: 220px;
             }
             .track-row {
-                align-items: center !important;
+                align-items: stretch !important;
                 flex-direction: row;
-                gap: 4px;
-                padding: 7px 8px !important;
+                flex-wrap: wrap;
+                gap: 7px;
+                padding: 9px 10px !important;
                 border-radius: 12px !important;
             }
             .track-row > div:last-child {
+                width: 100%;
                 justify-content: flex-end;
-                border-top: 0;
-                padding-top: 0;
-                gap: 0 !important;
+                border-top: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
+                padding-top: 6px;
+                gap: 4px !important;
             }
             .track-row button {
-                min-width: 34px;
-                min-height: 36px;
+                min-width: 38px;
+                min-height: 38px;
             }
             .track-row > div:first-child > button {
                 min-width: 36px;
@@ -282,7 +350,8 @@
                 display: none;
             }
             .track-row > div:first-child {
-                gap: 3px !important;
+                width: 100%;
+                gap: 6px !important;
             }
             .track-row h4 {
                 font-size: 10px !important;
@@ -345,9 +414,9 @@
                 padding-top: 8px !important;
             }
             #settingsModal > div {
-                padding: 12px !important;
+                padding: 14px !important;
                 gap: 10px !important;
-                max-width: 23rem !important;
+                max-width: calc(100vw - 16px) !important;
                 border-radius: 16px !important;
             }
             #settingsModal .space-y-3 {
@@ -358,8 +427,8 @@
             }
             #themeSelector button,
             #waveformColorSelector button {
-                padding: 5px !important;
-                min-height: 58px;
+                padding: 7px !important;
+                min-height: 60px;
             }
             #themeSelector button > div,
             #waveformColorSelector svg {
@@ -388,6 +457,28 @@
                 min-width: 44px;
                 min-height: 44px;
             }
+            #bulkLibraryActions {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 7px;
+            }
+            #bulkLibraryActions.hidden { display: none; }
+            #selectedTracksCount {
+                grid-column: 2;
+                grid-row: 1;
+                align-self: center;
+                text-align: right;
+                padding-right: 3px;
+            }
+            #selectAllTracksButton { grid-column: 1; grid-row: 1; }
+            #analyzeSelectedButton { grid-column: 1; grid-row: 2; justify-content: center; }
+            #deleteSelectedButton { grid-column: 2; grid-row: 2; justify-content: center; }
+            #bulkLibraryActions #deleteSelectedButton { width: 40px; justify-self: end; }
+            #bulkLibraryActions button {
+                width: 100%;
+                padding: 8px 7px !important;
+                font-size: 9px !important;
+            }
         }
     </style>
 </head>
@@ -401,21 +492,21 @@
                 <i data-lucide="smartphone" class="w-3.5 h-3.5"></i>
                 <span>Instalovat</span>
             </button>
-            <button onclick="triggerFileInput()" class="p-1.5 hover:bg-[var(--color-border)] rounded-lg transition" title="Nahrát ze zařízení">
-                <img src="source.png" alt="Nahrát ze zařízení" class="h-5">
+            <button onclick="triggerFileInput()" class="p-2 hover:bg-[var(--color-border)] rounded-lg transition" title="Nahrát ze zařízení">
+                <img src="source.png" alt="Nahrát ze zařízení" class="h-6">
             </button>
-            <button onclick="openMegaLoginDirectly()" class="p-1.5 hover:bg-[var(--color-border)] rounded-lg transition" title="Import z MEGA">
-                <img src="mega.png" alt="Import z MEGA" class="h-5">
+            <button onclick="openMegaLoginDirectly()" class="p-2 hover:bg-[var(--color-border)] rounded-lg transition" title="Import z MEGA">
+                <img src="mega.png" alt="Import z MEGA" class="h-6">
             </button>
-            <button onclick="loginWithGoogle()" class="p-1.5 hover:bg-[var(--color-border)] rounded-lg transition" title="Import z Google Drive">
-                <img src="googledrive.png" alt="Import z Google Drive" class="h-5">
+            <button onclick="loginWithGoogle()" class="p-2 hover:bg-[var(--color-border)] rounded-lg transition" title="Import z Google Drive">
+                <img src="googledrive.png" alt="Import z Google Drive" class="h-6">
             </button>
-            <button onclick="importFromDropbox()" class="p-1.5 hover:bg-[var(--color-border)] rounded-lg transition" title="Import z Dropbox">
-                <img src="dropbox.png" alt="Import z Dropbox" class="h-5">
+            <button onclick="importFromDropbox()" class="p-2 hover:bg-[var(--color-border)] rounded-lg transition" title="Import z Dropbox">
+                <img src="dropbox.png" alt="Import z Dropbox" class="h-6">
             </button>
-            <div class="w-px h-5 bg-[var(--color-border)]"></div>
-            <button onclick="openSettingsModal()" class="p-1.5 hover:bg-[var(--color-border)] rounded-lg transition" title="Nastavení">
-                <i data-lucide="settings" class="w-5 h-5 text-[var(--color-accent-primary)]"></i>
+            <div class="w-px h-6 bg-[var(--color-border)]"></div>
+            <button onclick="openSettingsModal()" class="p-2 hover:bg-[var(--color-border)] rounded-lg transition" title="Nastavení">
+                <i data-lucide="settings" class="w-6 h-6 text-[var(--color-accent-primary)]"></i>
             </button>
         </div>
         <div class="absolute bottom-0 left-0 h-px w-full bg-[var(--color-accent-primary)] shadow-[0_0_8px_var(--color-accent-primary)]"></div>
@@ -429,8 +520,8 @@
 
     <!-- CLOUD IMPORT MODAL -->
     <div id="cloudModal" class="fixed inset-0 bg-black/80 z-[100] hidden flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-[var(--color-bg-secondary)] border border-[var(--color-border)] w-full max-w-xs p-5 space-y-4 rounded-2xl shadow-2xl">
-            
+        <div class="modal-panel bg-[var(--color-bg-secondary)] border border-[var(--color-border)] w-full max-w-md p-6 space-y-5 rounded-2xl shadow-2xl">
+
             <!-- OBSAH 1: VÝBĚR SLUŽBY -->
             <div id="cloudServiceSelect" class="space-y-4">
                 <h3 class="text-[var(--color-text-main)] font-bold text-xs uppercase tracking-wider border-b border-[var(--color-border)] pb-2">Import z cloudu</h3>
@@ -508,7 +599,7 @@
 
     <!-- MODAL PRO VÝBĚR PLAYLISTU -->
     <div id="playlistSelectModal" class="fixed inset-0 bg-black/80 z-[100] hidden flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-[var(--color-bg-secondary)] border border-[var(--color-border)] w-full max-w-xs p-5 space-y-4 rounded-2xl shadow-2xl">
+        <div class="modal-panel bg-[var(--color-bg-secondary)] border border-[var(--color-border)] w-full max-w-md p-5 space-y-4 rounded-2xl shadow-2xl">
             <h3 class="text-[var(--color-text-main)] font-bold text-xs uppercase tracking-wider border-b border-[var(--color-border)] pb-2">Přidat do playlistu</h3>
             <div id="playlistSelectList" class="space-y-2 max-h-48 overflow-y-auto">
                 <!-- Dynamické playlisty -->
@@ -519,58 +610,44 @@
 
     <!-- MODAL PRO NASTAVENÍ -->
     <div id="settingsModal" class="fixed inset-0 bg-black/80 z-[100] hidden flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-[var(--color-bg-secondary)] border border-[var(--color-border)] w-full max-w-xs max-h-[90vh] overflow-y-auto p-5 space-y-4 rounded-2xl shadow-2xl">
+        <div class="modal-panel bg-[var(--color-bg-secondary)] border border-[var(--color-border)] w-full max-w-lg max-h-[90vh] overflow-y-auto p-6 space-y-5 rounded-2xl shadow-2xl">
             <h3 class="text-[var(--color-text-main)] font-bold text-xs uppercase tracking-wider border-b border-[var(--color-border)] pb-2">Nastavení</h3>
-            
+
             <div class="space-y-3 text-xs">
                 <label class="text-[9px] text-[var(--color-text-secondary)] uppercase font-bold block">Barevné schéma</label>
                 <div id="themeSelector" class="grid grid-cols-2 gap-2 text-[var(--color-text-main)]">
-                    <button onclick="setTheme('default')" class="p-2 border rounded-lg transition">
-                        <div class="w-full h-8 rounded" style="background: linear-gradient(135deg, #070a12 20%, #22d3ee 65%, #d946ef);"></div>
-                        <span class="text-[9px] mt-1.5 block">Cyber Neon</span>
+                    <button data-theme-option="default" onclick="setTheme('default')" class="theme-choice border rounded-xl transition flex items-center gap-2 text-left">
+                        <span class="flex -space-x-1.5"><i style="background:#070a12"></i><i style="background:#22d3ee"></i><i style="background:#d946ef"></i></span><span>Cyber Neon</span>
                     </button>
-                    <button onclick="setTheme('forest')" class="p-2 border border-transparent hover:border-[var(--color-border)] rounded-lg transition">
-                        <div class="w-full h-8 rounded" style="background: linear-gradient(135deg, #07120d, #34d399 65%, #a3e635);"></div>
-                        <span class="text-[9px] mt-1.5 block">Forest Pulse</span>
+                    <button data-theme-option="forest" onclick="setTheme('forest')" class="theme-choice border border-transparent rounded-xl transition flex items-center gap-2 text-left">
+                        <span class="flex -space-x-1.5"><i style="background:#07120d"></i><i style="background:#34d399"></i><i style="background:#a3e635"></i></span><span>Forest Pulse</span>
                     </button>
-                    <button onclick="setTheme('ocean')" class="p-2 border border-transparent hover:border-[var(--color-border)] rounded-lg transition">
-                        <div class="w-full h-8 rounded" style="background: linear-gradient(135deg, #050d1c, #38bdf8 65%, #2dd4bf);"></div>
-                        <span class="text-[9px] mt-1.5 block">Ocean Blue</span>
+                    <button data-theme-option="ocean" onclick="setTheme('ocean')" class="theme-choice border border-transparent rounded-xl transition flex items-center gap-2 text-left">
+                        <span class="flex -space-x-1.5"><i style="background:#050d1c"></i><i style="background:#38bdf8"></i><i style="background:#2dd4bf"></i></span><span>Ocean Blue</span>
                     </button>
-                    <button onclick="setTheme('sunset')" class="p-2 border border-transparent hover:border-[var(--color-border)] rounded-lg transition">
-                        <div class="w-full h-8 rounded" style="background: linear-gradient(135deg, #190714, #fb7185 60%, #f97316);"></div>
-                        <span class="text-[9px] mt-1.5 block">Sunset Club</span>
+                    <button data-theme-option="sunset" onclick="setTheme('sunset')" class="theme-choice border border-transparent rounded-xl transition flex items-center gap-2 text-left">
+                        <span class="flex -space-x-1.5"><i style="background:#190714"></i><i style="background:#fb7185"></i><i style="background:#f97316"></i></span><span>Sunset Club</span>
                     </button>
-                    <button onclick="setTheme('matrix')" class="p-2 border border-transparent hover:border-[var(--color-border)] rounded-lg transition">
-                        <div class="w-full h-8 rounded" style="background: linear-gradient(135deg, #000, #00ff41 70%, #111);"></div>
-                        <span class="text-[9px] mt-1.5 block">Matrix Live</span>
+                    <button data-theme-option="matrix" onclick="setTheme('matrix')" class="theme-choice border border-transparent rounded-xl transition flex items-center gap-2 text-left">
+                        <span class="flex -space-x-1.5"><i style="background:#000"></i><i style="background:#00ff41"></i><i style="background:#163d20"></i></span><span>Matrix Live</span>
                     </button>
-                    <button onclick="setTheme('arctic')" class="p-2 border border-transparent hover:border-[var(--color-border)] rounded-lg transition">
-                        <div class="w-full h-8 rounded" style="background: linear-gradient(135deg, #0b111b, #7dd3fc 65%, #e0f2fe);"></div>
-                        <span class="text-[9px] mt-1.5 block">Arctic Ice</span>
-                    </button>
-                    <button onclick="setTheme('club')" class="col-span-2 p-2 border border-transparent hover:border-[var(--color-border)] rounded-lg transition">
-                        <div class="w-full h-8 rounded" style="background: linear-gradient(90deg, #06030d, #00e5ff 35%, #ff2bd6 70%, #b7ff2a);"></div>
-                        <span class="text-[9px] mt-1.5 block">Neon Club</span>
+                    <button data-theme-option="club" onclick="setTheme('club')" class="theme-choice border border-transparent rounded-xl transition flex items-center gap-2 text-left">
+                        <span class="flex -space-x-1.5"><i style="background:#00e5ff"></i><i style="background:#ff2bd6"></i><i style="background:#b7ff2a"></i></span><span>Neon Club</span>
                     </button>
                 </div>
             </div>
 
             <div class="space-y-3 text-xs border-t border-[var(--color-border)] pt-4">
                 <label class="text-[9px] text-[var(--color-text-secondary)] uppercase font-bold block">Barva waveformu</label>
-                <div id="waveformColorSelector" class="grid grid-cols-3 gap-2 text-[var(--color-text-main)]">
-                    <button onclick="setWaveformColor('blue')" class="p-2 border rounded-lg transition" title="Modrý waveform">
-                        <svg viewBox="0 0 80 28" class="w-full h-8 rounded bg-black" aria-hidden="true"><path d="M0 14L3 10 5 19 8 5 11 22 14 9 17 17 20 3 23 24 26 8 29 19 32 6 35 21 38 11 41 16 44 4 47 23 50 7 53 20 56 10 59 17 62 5 65 22 68 8 71 19 74 11 77 16 80 14" fill="none" stroke="#22d3ee" stroke-width="2"/></svg>
-                        <span class="text-[9px] mt-1.5 block">Modrá</span>
-                    </button>
-                    <button onclick="setWaveformColor('green')" class="p-2 border border-transparent hover:border-[var(--color-border)] rounded-lg transition" title="Zelený waveform">
-                        <svg viewBox="0 0 80 28" class="w-full h-8 rounded bg-black" aria-hidden="true"><path d="M0 14L3 10 5 19 8 5 11 22 14 9 17 17 20 3 23 24 26 8 29 19 32 6 35 21 38 11 41 16 44 4 47 23 50 7 53 20 56 10 59 17 62 5 65 22 68 8 71 19 74 11 77 16 80 14" fill="none" stroke="#65f20d" stroke-width="2"/></svg>
-                        <span class="text-[9px] mt-1.5 block">Zelená</span>
-                    </button>
-                    <button onclick="setWaveformColor('red')" class="p-2 border border-transparent hover:border-[var(--color-border)] rounded-lg transition" title="Červený waveform">
-                        <svg viewBox="0 0 80 28" class="w-full h-8 rounded bg-black" aria-hidden="true"><path d="M0 14L3 10 5 19 8 5 11 22 14 9 17 17 20 3 23 24 26 8 29 19 32 6 35 21 38 11 41 16 44 4 47 23 50 7 53 20 56 10 59 17 62 5 65 22 68 8 71 19 74 11 77 16 80 14" fill="none" stroke="#ff2b22" stroke-width="2"/></svg>
-                        <span class="text-[9px] mt-1.5 block">Červená</span>
-                    </button>
+                <div id="waveformColorSelector" class="grid grid-cols-4 gap-2 text-[var(--color-text-main)]">
+                    <button data-waveform-color="blue" onclick="setWaveformColor('blue')" class="waveform-choice border rounded-xl transition"><i style="--wave-color:#22d3ee"></i><span>Modrá</span></button>
+                    <button data-waveform-color="green" onclick="setWaveformColor('green')" class="waveform-choice border border-transparent rounded-xl transition"><i style="--wave-color:#65f20d"></i><span>Zelená</span></button>
+                    <button data-waveform-color="red" onclick="setWaveformColor('red')" class="waveform-choice border border-transparent rounded-xl transition"><i style="--wave-color:#ff382e"></i><span>Červená</span></button>
+                    <button data-waveform-color="purple" onclick="setWaveformColor('purple')" class="waveform-choice border border-transparent rounded-xl transition"><i style="--wave-color:#a855f7"></i><span>Fialová</span></button>
+                    <button data-waveform-color="pink" onclick="setWaveformColor('pink')" class="waveform-choice border border-transparent rounded-xl transition"><i style="--wave-color:#ff3cac"></i><span>Růžová</span></button>
+                    <button data-waveform-color="orange" onclick="setWaveformColor('orange')" class="waveform-choice border border-transparent rounded-xl transition"><i style="--wave-color:#ff9f1c"></i><span>Oranžová</span></button>
+                    <button data-waveform-color="white" onclick="setWaveformColor('white')" class="waveform-choice border border-transparent rounded-xl transition"><i style="--wave-color:#f8fafc"></i><span>Bílá</span></button>
+                    <button data-waveform-color="rainbow" onclick="setWaveformColor('rainbow')" class="waveform-choice border border-transparent rounded-xl transition"><i class="rainbow"></i><span>Spektrum</span></button>
                 </div>
             </div>
 
@@ -584,7 +661,7 @@
                     <button onclick="document.getElementById('backgroundImageInput').click()" class="bg-[var(--color-accent-primary)] text-black font-bold py-2.5 rounded-lg hover:brightness-110 transition flex items-center justify-center gap-1.5">
                         <i data-lucide="image-plus" class="w-4 h-4"></i><span>Nahrát obrázek</span>
                     </button>
-                    <button id="removeBackgroundButton" onclick="removeCustomBackground()" class="hidden bg-[var(--color-bg-main)] border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:text-red-400 py-2.5 rounded-lg transition">Odstranit</button>
+                    <button id="removeBackgroundButton" onclick="removeCustomBackground()" class="bg-[var(--color-bg-main)] border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:text-red-400 disabled:opacity-40 disabled:cursor-not-allowed py-2.5 rounded-lg transition">Odebrat</button>
                 </div>
                 <div class="space-y-2">
                     <div class="flex items-center justify-between">
@@ -601,7 +678,7 @@
 
     <!-- MODAL PRO ÚPRAVU SKLADBY -->
     <div id="editTrackModal" class="fixed inset-0 bg-black/80 z-[100] hidden flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-[#1A1B20] border border-[var(--color-border)] w-full max-w-md p-5 space-y-4 rounded-2xl shadow-2xl flex flex-col max-h-[90vh]">
+        <div class="modal-panel bg-[#1A1B20] border border-[var(--color-border)] w-full max-w-xl p-6 space-y-5 rounded-2xl shadow-2xl flex flex-col max-h-[90vh]">
             <!-- Záhlaví -->
             <h3 class="text-[var(--color-text-main)] font-bold text-lg tracking-wider border-b border-[var(--color-border)] pb-3">Upravit skladbu</h3>
             
@@ -742,10 +819,23 @@
                 </select>
             </div>
 
+            <div id="bulkLibraryActions" class="hidden items-center gap-2 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] p-2 rounded-xl">
+                <button id="selectAllTracksButton" onclick="toggleSelectAllTracks()" class="flex items-center gap-1.5 px-2.5 py-2 text-[9px] font-bold text-[var(--color-text-main)] border border-[var(--color-border)] hover:border-[var(--color-accent-primary)] rounded-lg transition">
+                    <i data-lucide="check-check" class="w-3.5 h-3.5"></i><span>Vybrat vše</span>
+                </button>
+                <span id="selectedTracksCount" class="flex-1 text-[9px] text-[var(--color-text-secondary)]">Vybráno: 0</span>
+                <button id="analyzeSelectedButton" onclick="analyzeSelectedTracks()" disabled class="flex items-center gap-1.5 px-2.5 py-2 text-[9px] font-bold bg-[var(--color-accent-primary)] text-black disabled:opacity-40 disabled:cursor-not-allowed rounded-lg transition">
+                    <i data-lucide="cpu" class="w-3.5 h-3.5"></i><span>Lokální analýza</span>
+                </button>
+                <button id="deleteSelectedButton" onclick="deleteSelectedTracks()" disabled class="w-10 h-10 flex items-center justify-center bg-red-500/15 border border-red-500/40 text-red-400 hover:text-red-300 hover:bg-red-500/25 disabled:opacity-40 disabled:cursor-not-allowed rounded-lg transition" title="Odstranit vybrané skladby" aria-label="Odstranit vybrané skladby">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+            </div>
+
             <!-- Prázdný stav / Seznam skladeb -->
             <div id="libraryContainer" ondragover="handleLibraryDragOver(event)" ondragleave="handleLibraryDragLeave(event)" ondrop="handleLibraryDrop(event)" class="min-h-[250px] border border-dashed border-[var(--color-accent-primary)] p-6 flex flex-col items-center justify-center text-center rounded-2xl transition-colors">
-                <div id="emptyState" class="space-y-5 w-full max-w-xs">
-                    <i data-lucide="folder-open" class="w-14 h-14 text-[var(--color-text-secondary)]/20 mx-auto"></i>
+                <div id="emptyState" class="space-y-5 w-full max-w-sm">
+                    <i data-lucide="folder-open" class="w-16 h-16 text-[var(--color-text-secondary)]/20 mx-auto"></i>
                     <div>
                         <h3 class="text-lg leading-tight font-black text-[var(--color-text-main)] uppercase tracking-wide">Žádné skladby<br>nenalezeny</h3>
                     </div>
@@ -846,7 +936,7 @@
             if (themeSelector) {
                 const buttons = themeSelector.querySelectorAll('button');
                 buttons.forEach(btn => {
-                    const btnTheme = btn.getAttribute('onclick').match(/'([^']+)'/)[1];
+                    const btnTheme = btn.dataset.themeOption;
                     if (btnTheme === themeName) {
                         btn.classList.remove('border-transparent', 'hover:border-[var(--color-border)]');
                         btn.classList.add('border-[var(--color-accent-primary)]');
@@ -857,10 +947,11 @@
                 });
             }
         }
-        const savedTheme = localStorage.getItem('dawomixTheme') || 'default';
+        const storedTheme = localStorage.getItem('dawomixTheme');
+        const savedTheme = storedTheme === 'arctic' ? 'club' : (storedTheme || 'default');
         setTheme(savedTheme);
 
-        function applyCustomBackground(dataUrl) {
+        function applyCustomBackground(dataUrl, isCustom = true) {
             const preview = document.getElementById('backgroundImagePreview');
             const removeButton = document.getElementById('removeBackgroundButton');
             if (dataUrl) {
@@ -868,13 +959,13 @@
                 document.body.classList.add('custom-background');
                 preview.style.backgroundImage = `url("${dataUrl}")`;
                 preview.classList.remove('hidden');
-                removeButton.classList.remove('hidden');
+                removeButton.disabled = !isCustom;
             } else {
                 document.body.style.removeProperty('--custom-background-image');
                 document.body.classList.remove('custom-background');
                 preview.style.backgroundImage = '';
                 preview.classList.add('hidden');
-                removeButton.classList.add('hidden');
+                removeButton.disabled = true;
             }
         }
 
@@ -907,7 +998,7 @@
 
         function removeCustomBackground() {
             localStorage.removeItem('dawomixCustomBackground');
-            applyCustomBackground(null);
+            applyCustomBackground(null, false);
         }
 
         function setBackgroundVisibility(value) {
@@ -920,7 +1011,8 @@
         }
 
         setBackgroundVisibility(localStorage.getItem('dawomixBackgroundVisibility') || 26);
-        applyCustomBackground(localStorage.getItem('dawomixCustomBackground'));
+        const savedCustomBackground = localStorage.getItem('dawomixCustomBackground');
+        applyCustomBackground(savedCustomBackground, Boolean(savedCustomBackground));
 
         let db = null;
         let tracks = [];
@@ -928,7 +1020,8 @@
         let currentTrackIndex = -1;
         let activePlaylistTracks = [];
         let currentWaveformData = [];
-        let waveformColorMode = localStorage.getItem('dawomixWaveformColor') || 'blue';
+        let waveformColorMode = localStorage.getItem('dawomixWaveformColor') || 'rainbow';
+        const selectedTrackIds = new Set();
         let editingPlaylistId = null;
         let editingTrackId = null;
         const genres = ['House', 'Techno', 'Trance', 'D&B', 'Dubstep', 'Ambient', 'Hip-hop', 'Pop', 'Ostatní'];
@@ -956,11 +1049,12 @@
         }
 
         function setWaveformColor(colorName) {
-            waveformColorMode = ['blue', 'green', 'red'].includes(colorName) ? colorName : 'blue';
+            const availableColors = ['blue', 'green', 'red', 'purple', 'pink', 'orange', 'white', 'rainbow'];
+            waveformColorMode = availableColors.includes(colorName) ? colorName : 'rainbow';
             localStorage.setItem('dawomixWaveformColor', waveformColorMode);
             const selector = document.getElementById('waveformColorSelector');
             selector?.querySelectorAll('button').forEach(button => {
-                const active = button.getAttribute('onclick').includes(`'${waveformColorMode}'`);
+                const active = button.dataset.waveformColor === waveformColorMode;
                 button.classList.toggle('border-[var(--color-accent-primary)]', active);
                 button.classList.toggle('border-transparent', !active);
                 button.classList.toggle('hover:border-[var(--color-border)]', !active);
@@ -1259,18 +1353,18 @@
 
         function addTrackFromFile(file, duration) {
             const parsedName = parseTrackName(file.name);
-            const shouldAutoAnalyze = file.size <= 20 * 1024 * 1024;
             const initialTrack = {
                 title: parsedName.title,
                 artist: parsedName.artist,
                 duration: Number.isFinite(duration) && duration > 0 ? duration : 0,
                 bpm: null,
                 key: '--',
-                energy: shouldAutoAnalyze ? 'Analyzing' : 'Pending',
+                energy: 'Pending',
                 energyScore: null,
                 danceability: null,
                 analysisPending: true,
-                fileBlob: file
+                fileBlob: file,
+                fileName: file.name
             };
 
             // Persist first. On slower Android phones ID3 parsing or decoding a large MP3
@@ -1294,142 +1388,217 @@
                     });
                 }
 
-                // Let IndexedDB commit and the UI render before CPU-heavy analysis starts.
-                // Large files stay safely imported and can be analyzed manually with the
-                // waveform button, avoiding memory crashes on mobile devices.
-                if (shouldAutoAnalyze) {
-                    setTimeout(async () => {
-                        try {
-                            const analysis = await analyzeAudioFile(file);
-                            await updateTrackInDB(trackId, {
-                                ...analysis,
-                                analysisPending: false,
-                                analyzedAt: Date.now()
-                            });
-                        } catch (error) {
-                            console.error('Audio analysis failed:', error);
-                            await updateTrackInDB(trackId, {
-                                energy: 'Pending',
-                                analysisPending: true
-                            }).catch(() => {});
-                        }
-                    }, 250);
-                }
             });
         }
 
-        function fft(re, im) {
-            const n = re.length;
-            for (let i = 1, j = 0; i < n; i++) {
-                let bit = n >> 1;
-                for (; j & bit; bit >>= 1) j ^= bit;
-                j ^= bit;
-                if (i < j) [re[i], re[j], im[i], im[j]] = [re[j], re[i], im[j], im[i]];
+        let essentiaInstancePromise = null;
+
+        function getEssentiaInstance() {
+            if (!window.EssentiaWASM || !window.Essentia) throw new Error('Essentia.js se nepodařilo načíst. Zkontrolujte připojení k internetu.');
+            essentiaInstancePromise ||= window.EssentiaWASM().then(module => new window.Essentia(module));
+            return essentiaInstancePromise;
+        }
+
+        function resampleAudio(input, sourceRate, targetRate = 44100) {
+            if (sourceRate === targetRate) return input;
+            const output = new Float32Array(Math.round(input.length * targetRate / sourceRate));
+            const ratio = sourceRate / targetRate;
+            for (let i = 0; i < output.length; i++) {
+                const position = i * ratio;
+                const left = Math.floor(position);
+                const right = Math.min(input.length - 1, left + 1);
+                const fraction = position - left;
+                output[i] = input[left] * (1 - fraction) + input[right] * fraction;
             }
-            for (let len = 2; len <= n; len <<= 1) {
-                const angle = -2 * Math.PI / len;
-                const wLenR = Math.cos(angle), wLenI = Math.sin(angle);
-                for (let i = 0; i < n; i += len) {
-                    let wr = 1, wi = 0;
-                    for (let j = 0; j < len / 2; j++) {
-                        const uR = re[i + j], uI = im[i + j];
-                        const vR = re[i + j + len / 2] * wr - im[i + j + len / 2] * wi;
-                        const vI = re[i + j + len / 2] * wi + im[i + j + len / 2] * wr;
-                        re[i + j] = uR + vR; im[i + j] = uI + vI;
-                        re[i + j + len / 2] = uR - vR; im[i + j + len / 2] = uI - vI;
-                        [wr, wi] = [wr * wLenR - wi * wLenI, wr * wLenI + wi * wLenR];
-                    }
-                }
-            }
+            return output;
+        }
+
+        function essentiaKeyToCamelot(note, scale) {
+            const normalized = String(note || '').replace('♯', '#').replace('♭', 'b');
+            const pitchClass = { C:0, 'C#':1, Db:1, D:2, 'D#':3, Eb:3, E:4, F:5, 'F#':6, Gb:6, G:7, 'G#':8, Ab:8, A:9, 'A#':10, Bb:10, B:11 }[normalized];
+            if (!Number.isInteger(pitchClass)) return '--';
+            const major = ['8B','3B','10B','5B','12B','7B','2B','9B','4B','11B','6B','1B'];
+            const minor = ['5A','12A','7A','2A','9A','4A','11A','6A','1A','8A','3A','10A'];
+            return String(scale).toLowerCase() === 'minor' ? minor[pitchClass] : major[pitchClass];
         }
 
         async function analyzeAudioFile(file) {
             audioAnalysisContext ||= new (window.AudioContext || window.webkitAudioContext)();
             const buffer = await audioAnalysisContext.decodeAudioData(await file.arrayBuffer());
-            const sampleRate = buffer.sampleRate;
-            const length = Math.min(buffer.length, Math.floor(sampleRate * 180));
-            const mono = new Float32Array(length);
-            for (let c = 0; c < buffer.numberOfChannels; c++) {
-                const channel = buffer.getChannelData(c);
-                for (let i = 0; i < length; i++) mono[i] += channel[i] / buffer.numberOfChannels;
+            const mono = new Float32Array(buffer.length);
+            for (let channelIndex = 0; channelIndex < buffer.numberOfChannels; channelIndex++) {
+                const channel = buffer.getChannelData(channelIndex);
+                for (let i = 0; i < buffer.length; i++) mono[i] += channel[i] / buffer.numberOfChannels;
             }
 
-            // RMS envelope (100 samples/s) drives tempo, energy and beat regularity.
-            const hop = Math.max(1, Math.floor(sampleRate / 100));
-            const envelope = new Float32Array(Math.floor(length / hop));
+            const analysisSignal = resampleAudio(mono, buffer.sampleRate);
+            const essentia = await getEssentiaInstance();
+            const signalVector = essentia.arrayToVector(analysisSignal);
+            let rhythm;
+            let detectedKey;
+            try {
+                rhythm = essentia.RhythmExtractor2013(signalVector, 180, 'multifeature', 60);
+                detectedKey = essentia.KeyExtractor(signalVector);
+            } finally {
+                signalVector.delete();
+            }
+            const detectedBpm = Math.round(Number(rhythm.bpm)) || null;
+            const rhythmConfidence = Number(rhythm.confidence || 0);
+            rhythm.ticks?.delete?.();
+            rhythm.estimates?.delete?.();
+            rhythm.bpmIntervals?.delete?.();
+
             let totalSquares = 0;
-            for (let f = 0; f < envelope.length; f++) {
-                let sum = 0;
-                const start = f * hop;
-                for (let i = start; i < start + hop && i < length; i++) sum += mono[i] * mono[i];
-                envelope[f] = Math.sqrt(sum / hop);
-                totalSquares += sum;
+            let absolutePeak = 0;
+            for (let i = 0; i < mono.length; i += 8) {
+                const value = Math.abs(mono[i]);
+                totalSquares += value * value;
+                absolutePeak = Math.max(absolutePeak, value);
             }
-            const onset = new Float32Array(envelope.length);
-            let onsetMean = 0;
-            for (let i = 1; i < envelope.length; i++) { onset[i] = Math.max(0, envelope[i] - envelope[i - 1]); onsetMean += onset[i]; }
-            onsetMean /= Math.max(1, onset.length - 1);
-            for (let i = 0; i < onset.length; i++) onset[i] -= onsetMean;
-
-            let bestLag = 50, bestCorrelation = -Infinity;
-            for (let lag = 33; lag <= 100; lag++) {
-                let corr = 0, normA = 0, normB = 0;
-                for (let i = lag; i < onset.length; i++) {
-                    corr += onset[i] * onset[i - lag];
-                    normA += onset[i] * onset[i]; normB += onset[i - lag] * onset[i - lag];
-                }
-                corr /= Math.sqrt(normA * normB) || 1;
-                if (corr > bestCorrelation) { bestCorrelation = corr; bestLag = lag; }
-            }
-            let bpm = Math.round(6000 / bestLag);
-            while (bpm < 70) bpm *= 2;
-            while (bpm > 180) bpm = Math.round(bpm / 2);
-
-            // Chroma from sampled FFT frames; compare against major/minor key profiles.
-            const size = 4096, chroma = new Float64Array(12);
-            const frameStep = Math.max(size, Math.floor(sampleRate * 1.5));
-            for (let start = 0; start + size < length; start += frameStep) {
-                const re = new Float64Array(size), im = new Float64Array(size);
-                for (let i = 0; i < size; i++) re[i] = mono[start + i] * (0.5 - 0.5 * Math.cos(2 * Math.PI * i / (size - 1)));
-                fft(re, im);
-                for (let bin = 1; bin < size / 2; bin++) {
-                    const freq = bin * sampleRate / size;
-                    if (freq < 55 || freq > 2000) continue;
-                    const midi = Math.round(69 + 12 * Math.log2(freq / 440));
-                    chroma[(midi % 12 + 12) % 12] += Math.hypot(re[bin], im[bin]);
-                }
-            }
-            const major = [6.35,2.23,3.48,2.33,4.38,4.09,2.52,5.19,2.39,3.66,2.29,2.88];
-            const minor = [6.33,2.68,3.52,5.38,2.60,3.53,2.54,4.75,3.98,2.69,3.34,3.17];
-            let bestKey = 0, bestMode = 'major', bestScore = -Infinity;
-            for (let root = 0; root < 12; root++) for (const [mode, profile] of [['major', major], ['minor', minor]]) {
-                let score = 0;
-                for (let p = 0; p < 12; p++) score += chroma[(p + root) % 12] * profile[p];
-                if (score > bestScore) { bestScore = score; bestKey = root; bestMode = mode; }
-            }
-            const camelotMajor = ['8B','3B','10B','5B','12B','7B','2B','9B','4B','11B','6B','1B'];
-            const camelotMinor = ['5A','12A','7A','2A','9A','4A','11A','6A','1A','8A','3A','10A'];
-            const key = (bestMode === 'major' ? camelotMajor : camelotMinor)[bestKey];
-            const rms = Math.sqrt(totalSquares / Math.max(1, length));
-            const energyScore = Math.round(Math.max(0, Math.min(100, (rms / 0.24) * 100)));
-            const energy = energyScore < 35 ? 'Low' : energyScore < 68 ? 'Medium' : 'High';
-            const danceability = Math.round(Math.max(0, Math.min(100, 35 + bestCorrelation * 65)));
+            const sampledCount = Math.max(1, Math.ceil(mono.length / 8));
+            const rms = Math.sqrt(totalSquares / sampledCount);
+            const energyScore = Math.round(Math.max(0, Math.min(100, (rms / 0.22) * 82 + absolutePeak * 18)));
             const waveformData = [];
             const waveformBins = 420;
-            const samplesPerBin = Math.max(1, Math.floor(length / waveformBins));
+            const samplesPerBin = Math.max(1, Math.floor(mono.length / waveformBins));
             for (let bin = 0; bin < waveformBins; bin++) {
-                let peak = 0, squares = 0;
+                let peak = 0, squares = 0, count = 0;
                 const start = bin * samplesPerBin;
-                const end = Math.min(length, start + samplesPerBin);
+                const end = Math.min(mono.length, start + samplesPerBin);
                 for (let i = start; i < end; i += 8) {
                     const value = Math.abs(mono[i]);
                     peak = Math.max(peak, value);
                     squares += value * value;
+                    count++;
                 }
-                const sampled = Math.max(1, Math.ceil((end - start) / 8));
-                waveformData.push(Math.sqrt(squares / sampled) * 0.9 + peak * 0.1);
+                waveformData.push(Math.sqrt(squares / Math.max(1, count)) * 0.9 + peak * 0.1);
             }
-            return { bpm, key, energy, energyScore, danceability, waveformData, analysisConfidence: Math.round(Math.max(0, bestCorrelation) * 100) };
+
+            const confidence = Math.round(Math.max(0, Math.min(1, rhythmConfidence / 5.32)) * 100);
+            return {
+                bpm: detectedBpm,
+                key: essentiaKeyToCamelot(detectedKey.key, detectedKey.scale),
+                energy: energyScore < 35 ? 'Low' : energyScore < 68 ? 'Medium' : 'High',
+                energyScore,
+                danceability: confidence,
+                waveformData,
+                analysisConfidence: confidence,
+                keyConfidence: Math.round(Math.max(0, Math.min(1, Number(detectedKey.strength || 0))) * 100),
+                analysisMethod: 'essentia-js-wasm',
+                analyzedDuration: Math.round(buffer.duration)
+            };
+        }
+
+        function updateBulkLibraryActions() {
+            const validIds = new Set(tracks.map(track => track.id));
+            [...selectedTrackIds].forEach(id => { if (!validIds.has(id)) selectedTrackIds.delete(id); });
+            const toolbar = document.getElementById('bulkLibraryActions');
+            const count = selectedTrackIds.size;
+            toolbar?.classList.toggle('hidden', tracks.length === 0);
+            toolbar?.classList.toggle('flex', tracks.length > 0);
+            const counter = document.getElementById('selectedTracksCount');
+            if (counter) counter.textContent = `Vybráno: ${count} / ${tracks.length}`;
+            const selectAllLabel = document.querySelector('#selectAllTracksButton span');
+            if (selectAllLabel) selectAllLabel.textContent = tracks.length > 0 && count === tracks.length ? 'Zrušit výběr' : 'Vybrat vše';
+            const analyzeButton = document.getElementById('analyzeSelectedButton');
+            if (analyzeButton && !analyzeButton.dataset.running) analyzeButton.disabled = count === 0;
+            const deleteButton = document.getElementById('deleteSelectedButton');
+            if (deleteButton) deleteButton.disabled = count === 0 || Boolean(analyzeButton?.dataset.running);
+        }
+
+        function toggleTrackSelection(trackId, event) {
+            event?.stopPropagation();
+            if (selectedTrackIds.has(trackId)) selectedTrackIds.delete(trackId);
+            else selectedTrackIds.add(trackId);
+            updateBulkLibraryActions();
+            renderTrackList(getFilteredTracks());
+        }
+
+        function toggleSelectAllTracks() {
+            if (tracks.length > 0 && selectedTrackIds.size === tracks.length) selectedTrackIds.clear();
+            else tracks.forEach(track => selectedTrackIds.add(track.id));
+            updateBulkLibraryActions();
+            renderTrackList(getFilteredTracks());
+        }
+
+        function deleteSelectedTracks() {
+            const ids = new Set(selectedTrackIds);
+            if (!ids.size) return;
+            if (!confirm(`Opravdu odstranit ${ids.size} vybraných skladeb z knihovny?`)) return;
+
+            const transaction = db.transaction(['tracks', 'playlists'], 'readwrite');
+            const trackStore = transaction.objectStore('tracks');
+            const playlistStore = transaction.objectStore('playlists');
+            ids.forEach(id => trackStore.delete(id));
+            playlists.forEach(playlist => {
+                const updatedTrackIds = playlist.trackIds.filter(id => !ids.has(id));
+                if (updatedTrackIds.length !== playlist.trackIds.length) {
+                    playlist.trackIds = updatedTrackIds;
+                    playlistStore.put(playlist);
+                }
+            });
+
+            transaction.oncomplete = () => {
+                const playingTrackId = activePlaylistTracks[currentTrackIndex]?.id;
+                if (ids.has(playingTrackId)) {
+                    audioEngine.pause();
+                    if (currentObjectURL) URL.revokeObjectURL(currentObjectURL);
+                    currentObjectURL = null;
+                    currentTrackIndex = -1;
+                    resetPlayerUI();
+                }
+                activePlaylistTracks = activePlaylistTracks.filter(track => !ids.has(track.id));
+                selectedTrackIds.clear();
+                loadDataFromDB();
+            };
+            transaction.onerror = () => alert('Vybrané skladby se nepodařilo odstranit.');
+        }
+
+        function persistAnalyzedTrack(track) {
+            return new Promise((resolve, reject) => {
+                const request = db.transaction(['tracks'], 'readwrite').objectStore('tracks').put(track);
+                request.onsuccess = resolve;
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        async function analyzeSelectedTracks() {
+            const selected = tracks.filter(track => selectedTrackIds.has(track.id));
+            const analyzable = selected.filter(track => track.fileBlob);
+            if (!analyzable.length) {
+                alert('Vybrané skladby nemají uložený audio soubor pro skutečnou analýzu.');
+                return;
+            }
+            const button = document.getElementById('analyzeSelectedButton');
+            const label = button.querySelector('span');
+            button.dataset.running = 'true';
+            button.disabled = true;
+            updateBulkLibraryActions();
+            let completed = 0;
+            let failed = 0;
+            const failureMessages = [];
+            for (const track of analyzable) {
+                analyzingTrackIds.add(track.id);
+                label.textContent = `Analýza ${completed + 1}/${analyzable.length}`;
+                renderTrackList(getFilteredTracks());
+                try {
+                    const analysis = await analyzeAudioFile(track.fileBlob);
+                    Object.assign(track, analysis, { analysisPending: false, analyzedAt: Date.now() });
+                    await persistAnalyzedTrack(track);
+                } catch (error) {
+                    console.error(`Audio analysis failed for track ${track.id}:`, error);
+                    failed++;
+                    failureMessages.push(`${track.title}: ${error.message}`);
+                } finally {
+                    analyzingTrackIds.delete(track.id);
+                    completed++;
+                }
+            }
+            delete button.dataset.running;
+            label.textContent = 'Lokální analýza';
+            updateBulkLibraryActions();
+            loadDataFromDB();
+            if (failed) alert(`Analýza dokončena. Nezdařilo se analyzovat ${failed} skladeb.\n\n${failureMessages.slice(0, 3).join('\n')}`);
         }
 
         async function analyzeTrackById(trackId, event) {
@@ -1445,15 +1614,11 @@
             try {
                 const analysis = await analyzeAudioFile(track.fileBlob);
                 Object.assign(track, analysis, { analyzedAt: Date.now() });
-                await new Promise((resolve, reject) => {
-                    const req = db.transaction(['tracks'], 'readwrite').objectStore('tracks').put(track);
-                    req.onsuccess = resolve;
-                    req.onerror = reject;
-                });
+                await persistAnalyzedTrack(track);
                 loadDataFromDB();
             } catch (error) {
                 console.error('Audio analysis failed:', error);
-                alert('Analýzu skladby se nepodařilo dokončit.');
+                alert(`Lokální analýzu se nepodařilo dokončit: ${error.message}`);
             } finally {
                 analyzingTrackIds.delete(trackId);
                 renderTrackList(tracks);
@@ -1967,6 +2132,7 @@
         function updateAppUI() {
             const count = tracks.length;
             document.getElementById('statCount').innerText = count;
+            updateBulkLibraryActions();
 
             if (count === 0) {
                 document.getElementById('statDuration').innerText = "0m";
@@ -2007,18 +2173,20 @@
 
             tracksToRender.forEach((track, index) => {
                 const isPlaying = activePlaylistTracks[currentTrackIndex]?.id === track.id && !audioEngine.paused;
+                const isSelected = selectedTrackIds.has(track.id);
                 
                 let borderClass = "border-l-4 border-l-cyan-400";
                 if (track.energy === "Medium") borderClass = "border-l-4 border-l-yellow-400";
                 if (track.energy === "High") borderClass = "border-l-4 border-l-red-500";
 
                 const row = document.createElement('div');
-                row.className = `track-row p-3 flex items-center justify-between border rounded-2xl transition ${isPlaying ? 'bg-[var(--color-accent-secondary)]/10 border-[var(--color-accent-secondary)]' : 'bg-[var(--color-bg-secondary)] border-[var(--color-border)] hover:border-gray-700'} ${borderClass}`;
+                row.className = `track-row p-3 flex items-center justify-between border rounded-2xl transition ${isSelected ? 'ring-1 ring-[var(--color-accent-primary)] bg-[var(--color-accent-primary)]/5' : ''} ${isPlaying ? 'bg-[var(--color-accent-secondary)]/10 border-[var(--color-accent-secondary)]' : 'bg-[var(--color-bg-secondary)] border-[var(--color-border)] hover:border-gray-700'} ${borderClass}`;
                 row.setAttribute('draggable', 'true');
                 row.dataset.trackId = track.id;
 
                 row.innerHTML = `
                     <div class="flex items-center space-x-2.5 min-w-0 flex-1">
+                        <input type="checkbox" ${isSelected ? 'checked' : ''} onchange="toggleTrackSelection(${track.id}, event)" onclick="event.stopPropagation()" class="w-4 h-4 accent-[var(--color-accent-primary)] flex-shrink-0 cursor-pointer" aria-label="Vybrat skladbu ${escapeHtml(track.title)}">
                         <i data-lucide="grip-vertical" class="w-4 h-4 text-[var(--color-text-secondary)]/60 hover:text-[var(--color-text-main)] cursor-move flex-shrink-0" title="Přesunout skladbu"></i>
                         <button onclick="playTrackFromLibrary(${track.id}, event)" class="p-1 rounded-full hover:bg-white/10 transition-colors">
                             <i data-lucide="${isPlaying ? 'volume-2' : 'play'}" class="w-4 h-4 ${isPlaying ? 'text-emerald-300' : 'text-emerald-400/80'} hover:text-emerald-300"></i>
@@ -2033,7 +2201,7 @@
                         <button onclick="openEditModal(${track.id}, event)" class="w-7 h-7 flex items-center justify-center text-[var(--color-accent-primary)] hover:brightness-125 rounded-md hover:bg-white/5 transition" title="Upravit skladbu">
                             <i data-lucide="pencil" class="w-4 h-4"></i>
                         </button>
-                        <button onclick="analyzeTrackById(${track.id}, event)" class="w-7 h-7 flex items-center justify-center text-[var(--color-accent-secondary)] hover:brightness-125 rounded-md hover:bg-white/5 transition disabled:cursor-wait" title="Analyzovat skladbu" ${analyzingTrackIds.has(track.id) ? 'disabled' : ''}>
+                        <button onclick="analyzeTrackById(${track.id}, event)" class="w-7 h-7 flex items-center justify-center text-[var(--color-accent-secondary)] hover:brightness-125 rounded-md hover:bg-white/5 transition disabled:cursor-wait" title="Analyzovat BPM a tóninu lokálně pomocí Essentia.js" ${analyzingTrackIds.has(track.id) ? 'disabled' : ''}>
                             <i data-lucide="${analyzingTrackIds.has(track.id) ? 'loader-circle' : 'audio-waveform'}" class="w-4 h-4 ${analyzingTrackIds.has(track.id) ? 'animate-spin' : ''}"></i>
                         </button>
                         <button onclick="openPlaylistSelectModal(${track.id}, event)" class="w-7 h-7 flex items-center justify-center text-[var(--color-accent-tertiary)] hover:brightness-125 rounded-md hover:bg-white/5 transition" title="Přidat do playlistu">
@@ -2380,9 +2548,14 @@
                 const palettes = {
                     blue:  ['#176b93', '#149fcb', '#21cde5', '#65e7f4', '#a5d8ff'],
                     green: ['#247a16', '#43b91d', '#65ed16', '#9cff2e', '#d0ff75'],
-                    red:   ['#8f1515', '#d51d16', '#ff3122', '#ff6a22', '#f58ab2']
+                    red:   ['#8f1515', '#d51d16', '#ff3122', '#ff6a22', '#f58ab2'],
+                    purple:['#4c1d78', '#7130a5', '#9d4edd', '#c77dff', '#e0aaff'],
+                    pink:  ['#80104e', '#c21875', '#f72585', '#ff5ca8', '#ffb3d9'],
+                    orange:['#8a3f08', '#d9660b', '#ff8c18', '#ffb52e', '#ffe08a'],
+                    white: ['#64748b', '#94a3b8', '#cbd5e1', '#f1f5f9', '#ffffff'],
+                    rainbow:['#22d3ee', '#65f20d', '#ffd43b', '#ff382e', '#a855f7']
                 };
-                const palette = palettes[waveformColorMode] || palettes.blue;
+                const palette = palettes[waveformColorMode] || palettes.rainbow;
                 if (level < 0.28) return palette[0];
                 if (level < 0.52) return palette[1];
                 if (level < 0.72) return palette[2];
@@ -2444,7 +2617,7 @@
             }
         }
 
-        function filterTracks() {
+        function getFilteredTracks() {
             const query = document.getElementById('searchInput').value.toLowerCase();
             const sortBy = document.getElementById('sortTracksBy')?.value || 'default';
             const filtered = tracks.filter(t =>
@@ -2457,7 +2630,11 @@
                 const keyB = String(b.key || '');
                 return (parseInt(keyA, 10) || 99) - (parseInt(keyB, 10) || 99) || keyA.localeCompare(keyB);
             });
-            renderTrackList(filtered);
+            return filtered;
+        }
+
+        function filterTracks() {
+            renderTrackList(getFilteredTracks());
         }
 
         function toggleFilterPanel() {
